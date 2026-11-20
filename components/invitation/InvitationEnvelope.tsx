@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
-import { weddingConfig } from '@/config/wedding';
 import { theme } from '@/config/theme';
 import { FlowerPetals } from '@/components/effects/FlowerPetals';
 import { useEnvelopeAnimation } from './EnvelopeAnimation';
@@ -69,6 +68,29 @@ export function InvitationEnvelope({
   const handleOpenClick = () => {
     if (isAnimating || isOpen) return;
     playAnimation();
+  };
+
+  // Interactive 3D tilt & dynamic specular light sheen state
+  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50 });
+
+  const handleEnvelopePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isAnimating || isOpen) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    // Elegant, subtle 3D tilt angle (up to ~7.5 degrees)
+    const rotateX = -((y - centerY) / centerY) * 7.5;
+    const rotateY = ((x - centerX) / centerX) * 7.5;
+    const sheenX = Math.round((x / rect.width) * 100);
+    const sheenY = Math.round((y / rect.height) * 100);
+    setTilt({ rotateX, rotateY, sheenX, sheenY });
+  };
+
+  const handleEnvelopePointerLeave = () => {
+    if (isAnimating) return;
+    setTilt({ rotateX: 0, rotateY: 0, sheenX: 50, sheenY: 50 });
   };
 
   return (
@@ -261,6 +283,8 @@ export function InvitationEnvelope({
               <div
                 className="relative w-full flex items-center justify-center my-1"
                 style={{ perspective: '1100px' }}
+                onPointerMove={handleEnvelopePointerMove}
+                onPointerLeave={handleEnvelopePointerLeave}
               >
                 <div
                   ref={envelopeRef}
@@ -280,6 +304,12 @@ export function InvitationEnvelope({
                     boxShadow:
                       '0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 10px 25px -5px rgba(84, 20, 38, 0.6), 0 0 30px rgba(201, 154, 69, 0.2)',
                     border: '1px solid rgba(201, 154, 69, 0.35)',
+                    transform: !isAnimating
+                      ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg)`
+                      : undefined,
+                    transformStyle: 'preserve-3d',
+                    willChange: 'transform, opacity',
+                    transition: isAnimating ? undefined : 'transform 0.12s ease-out',
                   }}
                 >
                   {/* Subtle envelope paper texture and lighting */}
@@ -287,6 +317,16 @@ export function InvitationEnvelope({
                     {/* Inner gold frame line on envelope */}
                     <div className="absolute inset-2.5 rounded-xl border border-antique-gold/25 pointer-events-none" />
                   </div>
+
+                  {/* Dynamic 3D Specular Light Sheen */}
+                  <div
+                    className="absolute inset-0 rounded-2xl pointer-events-none transition-opacity duration-300"
+                    style={{
+                      background: `radial-gradient(circle at ${tilt.sheenX}% ${tilt.sheenY}%, rgba(255, 240, 200, 0.18) 0%, transparent 65%)`,
+                      mixBlendMode: 'screen',
+                      zIndex: 15,
+                    }}
+                  />
 
                   {/* ------------------------------------------------------ */}
                   {/* Inside Invitation Card (Slides up and expands)         */}
@@ -314,9 +354,17 @@ export function InvitationEnvelope({
                       Together With Their Families
                     </div>
 
-                    {/* Couple Initials Preview — single line, fit nicely in card space */}
-                    <div className="font-script text-2xl sm:text-3xl md:text-4xl text-royal-maroon leading-tight my-1 tracking-wide whitespace-nowrap">
-                      {weddingConfig.coupleInitials}
+                    {/* Couple Initials Preview — perfectly balanced and unclipped */}
+                    <div className="flex items-center justify-center select-none leading-none my-1">
+                      <span className="font-script text-3xl sm:text-4xl text-royal-maroon font-bold">
+                        D
+                      </span>
+                      <span className="font-serif text-sm sm:text-base text-antique-gold/90 mx-1.5 -mt-1 font-semibold">
+                        &amp;
+                      </span>
+                      <span className="font-script text-3xl sm:text-4xl text-royal-maroon font-bold pr-1.5">
+                        V
+                      </span>
                     </div>
 
                     <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-antique-gold to-transparent my-1.5" />
@@ -457,28 +505,48 @@ export function InvitationEnvelope({
                       }
                     }}
                     aria-label="Dev & Vishakha seal button - click to open envelope"
-                    className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-[72px] h-[72px] sm:w-[84px] sm:h-[84px] rounded-full transition-transform duration-300 group-hover:scale-105 active:scale-95 cursor-pointer"
+                    className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full transition-transform duration-300 group-hover:scale-105 active:scale-95 cursor-pointer"
                     style={{
                       zIndex: 40,
                       background:
                         'radial-gradient(circle at 35% 35%, #FFF3DB 0%, #E8C97A 25%, #C99A45 60%, #A07628 85%, #6B4912 100%)',
                       boxShadow:
-                        '0 6px 18px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.65), inset 0 -3px 5px rgba(0, 0, 0, 0.45)',
-                      border: '1.5px solid rgba(255, 243, 219, 0.5)',
+                        '0 8px 22px rgba(0, 0, 0, 0.55), inset 0 2px 4px rgba(255, 255, 255, 0.7), inset 0 -3px 5px rgba(0, 0, 0, 0.45)',
+                      border: '1.5px solid rgba(255, 243, 219, 0.6)',
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform, opacity',
                     }}
                   >
                     {/* Concentric inner engraved ring */}
-                    <div className="absolute inset-1.5 sm:inset-2 rounded-full border border-antique-gold/70 border-dashed pointer-events-none" />
+                    <div className="absolute inset-2 sm:inset-2.5 rounded-full border border-antique-gold/70 border-dashed pointer-events-none" />
 
-                    {/* Seal Monogram Initials — single line, perfectly centered inside ring */}
-                    <span
-                      className="font-script text-xl sm:text-2xl font-bold tracking-normal whitespace-nowrap text-deep-burgundy select-none leading-none px-1 text-center"
-                      style={{
-                        textShadow: '0 1px 1px rgba(255, 255, 255, 0.6)',
-                      }}
-                    >
-                      {weddingConfig.coupleInitials}
-                    </span>
+                    {/* Seal Monogram Initials — perfectly centered, unclipped royal layout */}
+                    <div className="relative flex items-center justify-center select-none leading-none pr-0.5 pointer-events-none">
+                      <span
+                        className="font-script text-2xl sm:text-3xl font-bold text-deep-burgundy inline-block"
+                        style={{
+                          textShadow: '0 1px 1.5px rgba(255, 255, 255, 0.75)',
+                        }}
+                      >
+                        D
+                      </span>
+                      <span
+                        className="font-serif text-xs sm:text-sm font-semibold text-royal-maroon/90 mx-0.5 -mt-0.5 inline-block"
+                        style={{
+                          textShadow: '0 1px 1px rgba(255, 255, 255, 0.6)',
+                        }}
+                      >
+                        &amp;
+                      </span>
+                      <span
+                        className="font-script text-2xl sm:text-3xl font-bold text-deep-burgundy inline-block pr-1.5"
+                        style={{
+                          textShadow: '0 1px 1.5px rgba(255, 255, 255, 0.75)',
+                        }}
+                      >
+                        V
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

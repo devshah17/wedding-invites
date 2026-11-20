@@ -144,7 +144,8 @@ export function useEnvelopeAnimation(
   }, []);
 
   /**
-   * Plays the complete 7-step physical envelope opening animation sequence.
+   * Plays the complete physical envelope opening animation sequence.
+   * Purely GPU-composited (transform, opacity) with zero paint/rasterization thrashing.
    */
   const playAnimation = useCallback(
     (onCompleteOverride?: () => void) => {
@@ -170,32 +171,20 @@ export function useEnvelopeAnimation(
       timelineRef.current = tl;
 
       // -------------------------------------------------------------
-      // Step 1: Button Flash & Fade (0.0s)
-      // Button glows brighter, pulses up slightly, then gently fades
-      // along with helper text so full focus rests on the envelope.
+      // Step 1: Seal Breaking & Button/Text Fade (0.0s - 0.28s)
+      // Wax seal pops and dissolves with a gentle tilt; button & text fade.
       // -------------------------------------------------------------
       if (buttonRef.current) {
         tl.to(
           buttonRef.current,
           {
-            scale: 1.08,
-            boxShadow:
-              '0 0 35px rgba(232, 201, 122, 0.9), 0 0 70px rgba(201, 154, 69, 0.6)',
-            filter: 'brightness(1.25)',
+            scale: 0.94,
+            opacity: 0,
             duration: 0.25,
             ease: 'power2.out',
-          },
-          0
-        ).to(
-          buttonRef.current,
-          {
-            scale: 0.95,
-            opacity: 0,
-            duration: 0.35,
-            ease: 'power2.in',
             pointerEvents: 'none',
           },
-          0.25
+          0
         );
       }
 
@@ -205,149 +194,94 @@ export function useEnvelopeAnimation(
           {
             opacity: 0,
             y: -10,
-            duration: 0.4,
-            ease: 'power2.in',
-          },
-          0.15
-        );
-      }
-
-      // -------------------------------------------------------------
-      // Step 2: Envelope Lift (0.3s)
-      // Envelope lifts slightly forward in 3D space and shadow deepens.
-      // -------------------------------------------------------------
-      if (envelopeRef.current) {
-        tl.to(
-          envelopeRef.current,
-          {
-            scale: 1.05,
-            y: -8,
-            boxShadow:
-              '0 30px 60px -10px rgba(0, 0, 0, 0.75), 0 15px 35px -5px rgba(84, 20, 38, 0.8), 0 0 40px rgba(201, 154, 69, 0.3)',
-            duration: 0.5,
+            duration: 0.25,
             ease: 'power2.out',
           },
-          0.3
+          0
         );
       }
 
-      // -------------------------------------------------------------
-      // Step 3: Seal Break (0.6s)
-      // Wax seal cracks - scale up slightly, fades with a gentle tilt
-      // like breaking an auspicious royal wax seal.
-      // -------------------------------------------------------------
       if (sealRef.current) {
         tl.to(
           sealRef.current,
           {
-            scale: 1.25,
-            rotation: 18,
+            scale: 1.15,
+            rotation: 12,
             opacity: 0,
-            filter: 'blur(3px)',
-            duration: 0.35,
-            ease: 'back.in(1.8)',
+            duration: 0.28,
+            ease: 'power2.out',
           },
-          0.6
+          0
         ).set(
           sealRef.current,
           {
             display: 'none',
           },
-          0.95
+          0.29
         );
       }
 
       // -------------------------------------------------------------
-      // Step 4: Flap Open (0.9s)
-      // Top triangular flap rotates backward 180 degrees using 3D perspective.
-      // At halfway point (90 deg), its zIndex drops behind the emerging card.
+      // Step 2: 3D Top Flap Opens Backward (0.20s - 0.75s)
+      // Triangular flap smoothly hinges open backward in 3D.
+      // At midpoint (0.45s), zIndex switches behind the rising card.
       // -------------------------------------------------------------
       if (flapRef.current) {
         tl.to(
           flapRef.current,
           {
             rotateX: -180,
-            duration: 0.8,
+            duration: 0.55,
             ease: 'power2.inOut',
             transformOrigin: 'top center',
           },
-          0.9
+          0.2
         );
 
-        // Switch flap z-index halfway so it rests behind the card
         tl.set(
           flapRef.current,
           {
             zIndex: 5,
           },
-          1.3
+          0.45
         );
       }
 
       // -------------------------------------------------------------
-      // Step 5: Card Slide Up (1.3s)
-      // The pristine ivory invitation card rises upward from inside
-      // the pocket cavity to sit prominently above the envelope.
+      // Step 3: Royal Invitation Card Glides Up (0.48s - 1.15s)
+      // The sacred ivory card rises cleanly out of the pocket cavity,
+      // presenting the blessings and names with dignified grandeur.
       // -------------------------------------------------------------
       if (cardRef.current) {
         tl.to(
           cardRef.current,
           {
-            y: '-65%',
+            y: '-72%',
+            scale: 1.02,
             zIndex: 35,
-            boxShadow:
-              '0 20px 40px -8px rgba(0, 0, 0, 0.5), 0 0 25px rgba(201, 154, 69, 0.4)',
-            duration: 0.7,
-            ease: 'power2.out',
+            duration: 0.65,
+            ease: 'power3.out',
           },
-          1.3
+          0.48
         );
       }
 
       // -------------------------------------------------------------
-      // Step 6: Card Expand (2.0s)
-      // The invitation card expands grandly to fill the entire viewport:
-      // - Scales up smoothly
-      // - Border radius softens from rounded to 0
-      // - Background fills into radiant ivory
-      // - Envelope body and surrounding decorations fade away
+      // Step 4: Velvety Dissolve into Main Invitation (1.20s - 1.75s)
+      // The revealed card and envelope lift forward together slightly
+      // and fade out gracefully, transitioning seamlessly into the page.
       // -------------------------------------------------------------
-      if (cardRef.current) {
-        // Calculate dynamic scale factor to cover the entire viewport
-        const cardEl = cardRef.current;
-        const currentWidth = cardEl.offsetWidth || 360;
-        const currentHeight = cardEl.offsetHeight || 240;
-        const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
-        const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 900;
-
-        const scaleX = viewportWidth / currentWidth;
-        const scaleY = viewportHeight / currentHeight;
-        const expansionScale = Math.max(scaleX, scaleY) * 1.25;
-
-        tl.to(
-          cardRef.current,
-          {
-            scale: expansionScale,
-            borderRadius: 0,
-            backgroundColor: '#FFF9F0',
-            duration: 0.8,
-            ease: 'power3.inOut',
-          },
-          2.0
-        );
-      }
-
-      // Fade out background envelope structure and decorations during expansion
       if (envelopeRef.current) {
         tl.to(
           envelopeRef.current,
           {
             opacity: 0,
-            scale: 1.15,
-            duration: 0.65,
-            ease: 'power2.in',
+            scale: 1.05,
+            y: -16,
+            duration: 0.55,
+            ease: 'power2.inOut',
           },
-          2.15
+          1.2
         );
       }
 
@@ -356,17 +290,12 @@ export function useEnvelopeAnimation(
           decorationsRef.current,
           {
             opacity: 0,
-            duration: 0.6,
-            ease: 'power2.in',
+            duration: 0.45,
+            ease: 'power2.inOut',
           },
-          2.1
+          1.2
         );
       }
-
-      // -------------------------------------------------------------
-      // Step 7: Fade Complete (2.8s)
-      // The timeline automatically calls onComplete callback at end.
-      // -------------------------------------------------------------
     },
     [isAnimating, onStart, onComplete]
   );

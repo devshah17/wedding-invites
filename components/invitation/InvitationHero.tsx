@@ -6,7 +6,7 @@ import { weddingConfig } from '@/config/wedding';
 import { formatWeddingDate } from '@/lib/date';
 import { DecorativeDivider } from '@/components/animations/DecorativeDivider';
 import { RoyalElephantArtwork } from '@/components/sacred/DeityArtworks';
-import { CalligraphyGanesha } from '@/components/sacred/CalligraphyGanesha';
+import { Royal3DMedallion } from '@/components/sacred/Royal3DMedallion';
 
 /**
  * Traditional Indian Toran (hanging arch) SVG Border
@@ -371,8 +371,8 @@ export function InvitationHero() {
         >
           <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85 hidden sm:block" facing="right" />
           <div className="flex flex-col items-center">
-            <CalligraphyGanesha className="w-20 h-24 sm:w-24 sm:h-28 drop-shadow-xs mb-1" />
-            <h2 className="font-serif text-sm md:text-base tracking-[0.28em] text-antique-gold font-bold select-none">
+            <Royal3DMedallion size={124} />
+            <h2 className="font-serif text-sm md:text-base tracking-[0.28em] text-antique-gold font-bold select-none mt-2">
               ॐ श्री गणेशाय नमः
             </h2>
           </div>
