@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+:root {
+  --color-royal-maroon: #781F35;
+  --color-deep-burgundy: #541426;
+  --color-antique-gold: #C99A45;
+  --color-champagne: #F6EBD5;
+  --color-ivory: #FCFAF7;
+  --color-soft-blush: #FAF4EF;
+  --color-vermilion: #D85A32;
+  --color-leaf-green: #59764B;
+  --color-dark-gold: #A67C30;
+  --color-light-gold: #E8C97A;
+}
+
+@theme inline {
+  /* Map all colors as Tailwind tokens */
+  --color-royal-maroon: var(--color-royal-maroon);
+  --color-deep-burgundy: var(--color-deep-burgundy);
+  --color-antique-gold: var(--color-antique-gold);
+  --color-champagne: var(--color-champagne);
+  --color-ivory: var(--color-ivory);
+  --color-soft-blush: var(--color-soft-blush);
+  --color-vermilion: var(--color-vermilion);
+  --color-leaf-green: var(--color-leaf-green);
+  --color-dark-gold: var(--color-dark-gold);
+  --color-light-gold: var(--color-light-gold);
+
+  /* Font families */
+  --font-script: var(--font-great-vibes);
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-montserrat);
+
+  /* Animations */
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-shimmer: shimmer 3s infinite linear;
+  --animate-petal-fall: petal-fall 10s linear infinite;
+  --animate-bell-swing: bell-swing 3s ease-in-out infinite;
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+  --animate-fade-in-up: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fadeInUp: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-sparkle: sparkle 2s ease-in-out infinite;
+  --animate-gradient-shift: gradientShift 6s ease infinite;
+  --animate-gradientShift: gradientShift 6s ease infinite;
+}
+
+/* ==========================================================================
+   Base Styles & Typography
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
+  color-scheme: light;
+}
+
+body {
+  background-color: #FAF8F5;
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23C99A45' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M60 10 C65 25, 75 35, 90 40 C75 45, 65 55, 60 70 C55 55, 45 45, 30 40 C45 35, 55 25, 60 10 Z' /%3E%3Ccircle cx='60' cy='40' r='6' /%3E%3Cpath d='M60 70 C70 85, 85 90, 100 85 C85 95, 75 110, 60 120 C45 110, 35 95, 20 85 C35 90, 50 85, 60 70 Z' /%3E%3Ccircle cx='0' cy='0' r='8' /%3E%3Ccircle cx='120' cy='0' r='8' /%3E%3Ccircle cx='0' cy='120' r='8' /%3E%3Ccircle cx='120' cy='120' r='8' /%3E%3Cpath d='M0 60 C15 50, 25 35, 20 20 C30 35, 40 45, 50 50 C35 55, 25 70, 20 85 C15 70, 0 60, 0 60 Z' /%3E%3Cpath d='M120 60 C105 50, 95 35, 100 20 C90 35, 80 45, 70 50 C85 55, 95 70, 100 85 C105 70, 120 60, 120 60 Z' /%3E%3C/g%3E%3C/svg%3E");
+  background-size: 130px 130px;
+  color: var(--color-deep-burgundy);
+  min-height: 100vh;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Gold Selection Style */
+::selection {
+  background-color: var(--color-antique-gold);
+  color: var(--color-ivory);
+}
+
+::-moz-selection {
+  background-color: var(--color-antique-gold);
+  color: var(--color-ivory);
+}
+
+/* ==========================================================================
+   Custom Thin Gold Scrollbar
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-champagne);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-antique-gold);
+  border-radius: 9999px;
+  border: 1px solid var(--color-champagne);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-dark-gold);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-antique-gold) var(--color-champagne);
+}
+
+/* ==========================================================================
+   Keyframe Animations
+   ========================================================================== */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  90% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(70px, 100vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes bell-swing {
+  0%, 100% {
+    transform: rotate(0deg);
+    transform-origin: top center;
+  }
+  20% {
+    transform: rotate(10deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 8px rgba(201, 154, 69, 0.25);
+    filter: drop-shadow(0 0 3px rgba(201, 154, 69, 0.3));
+  }
+  100% {
+    box-shadow: 0 0 22px rgba(201, 154, 69, 0.65);
+    filter: drop-shadow(0 0 10px rgba(201, 154, 69, 0.65));
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(180deg);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ==========================================================================
+   Animation Utility Classes
+   ========================================================================== */
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
+}
+
+.animate-petal-fall {
+  animation: petal-fall 10s linear infinite;
+}
+
+.animate-bell-swing {
+  animation: bell-swing 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+.animate-fade-in-up,
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.animate-gradient-shift,
+.animate-gradientShift {
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* ==========================================================================
+   Decorative Gold & Royal Utility Classes
+   ========================================================================== */
+.text-gold-gradient,
+.gold-gradient-text {
+  background: linear-gradient(135deg, #A67C30 0%, #C99A45 45%, #E8C97A 75%, #C99A45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gold-light-gradient {
+  background: linear-gradient(135deg, #C99A45 0%, #E8C97A 50%, #FFF9F0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #A67C30 0%, #C99A45 50%, #E8C97A 100%);
+}
+
+.bg-maroon-gradient {
+  background: linear-gradient(135deg, #781F35 0%, #541426 100%);
+}
+
+.bg-champagne-gradient {
+  background: linear-gradient(135deg, #FFF9F0 0%, #F6EBD5 100%);
+}
+
+.border-gold-gradient {
+  border-image: linear-gradient(135deg, #C99A45 0%, #E8C97A 50%, #A67C30 100%) 1;
+}
+
+.gold-shadow {
+  box-shadow: 0 4px 20px -2px rgba(201, 154, 69, 0.25);
+}
+
+.gold-shadow-lg {
+  box-shadow: 0 10px 30px -5px rgba(201, 154, 69, 0.35);
+}
+
+.gold-glow-text {
+  text-shadow: 0 0 12px rgba(201, 154, 69, 0.45);
+}
+
+/* ==========================================================================
+   Reduced Motion Accessibility
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
