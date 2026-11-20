@@ -108,7 +108,6 @@ export function generateICSFile(event: WeddingEvent): string {
   
   const descriptionParts = [
     event.description,
-    event.dressCode ? `Dress Code: ${event.dressCode}` : null,
     `Venue: ${event.venue.name}`,
     `${event.venue.address}, ${event.venue.city}, ${event.venue.state}`,
   ].filter(Boolean);
@@ -176,7 +175,6 @@ export function generateGoogleCalendarUrl(event: WeddingEvent): string {
   
   const descriptionParts = [
     event.description,
-    event.dressCode ? `Dress Code: ${event.dressCode}` : null,
     `Venue: ${event.venue.name}`,
     `${event.venue.address}, ${event.venue.city}, ${event.venue.state}`,
   ].filter(Boolean);

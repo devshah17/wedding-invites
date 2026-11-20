@@ -144,14 +144,14 @@ export function EventCard({ event, index }: EventCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.7, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] as const }}
-      className="relative rounded-3xl overflow-hidden border border-antique-gold/30 shadow-xl transition-all duration-300 hover:shadow-2xl"
+      className="relative rounded-3xl border border-antique-gold/30 shadow-xl transition-all duration-300 hover:shadow-2xl"
       style={{
         backgroundColor: event.theme.backgroundColor || '#FFF9F0',
       }}
     >
       {/* Decorative Top Accent Stripe */}
       <div
-        className="h-2 w-full"
+        className="h-2 w-full rounded-t-3xl"
         style={{
           background: event.theme.gradient,
         }}
@@ -203,7 +203,7 @@ export function EventCard({ event, index }: EventCardProps) {
           <LocationPanel event={event} />
 
           {/* Action Row: RSVP & Add to Calendar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex items-center gap-2">
               <RSVPButton eventId={event.id} eventName={event.name} />
               <CalendarButton event={event} />

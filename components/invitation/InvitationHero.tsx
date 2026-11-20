@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { weddingConfig } from '@/config/wedding';
 import { formatWeddingDate } from '@/lib/date';
 import { DecorativeDivider } from '@/components/animations/DecorativeDivider';
+import Image from 'next/image';
 import { RoyalElephantArtwork } from '@/components/sacred/DeityArtworks';
-import { Royal3DMedallion } from '@/components/sacred/Royal3DMedallion';
 
 /**
  * Traditional Indian Toran (hanging arch) SVG Border
@@ -371,8 +371,21 @@ export function InvitationHero() {
         >
           <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85 hidden sm:block" facing="right" />
           <div className="flex flex-col items-center">
-            <Royal3DMedallion size={124} />
-            <h2 className="font-serif text-sm md:text-base tracking-[0.28em] text-antique-gold font-bold select-none mt-2">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="relative flex justify-center mb-2 filter drop-shadow-[0_8px_20px_rgba(201,154,69,0.35)]"
+            >
+              <Image
+                src="/images/ganpati.png"
+                alt="Lord Shree Ganesha"
+                width={130}
+                height={160}
+                priority
+                className="w-24 sm:w-28 md:w-32 h-auto max-w-full select-none object-contain"
+              />
+            </motion.div>
+            <h2 className="font-serif text-sm md:text-base tracking-[0.28em] text-antique-gold font-bold select-none">
               ॐ श्री गणेशाय नमः
             </h2>
           </div>

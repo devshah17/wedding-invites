@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { theme } from '@/config/theme';
 import { FlowerPetals } from '@/components/effects/FlowerPetals';
+import Image from 'next/image';
 import { useEnvelopeAnimation } from './EnvelopeAnimation';
-import { CalligraphyGanesha } from '@/components/sacred/CalligraphyGanesha';
 
 export interface InvitationEnvelopeProps {
   /** Callback fired when the envelope opening sequence finishes */
@@ -246,14 +246,21 @@ export function InvitationEnvelope({
             <main className="relative flex-1 flex flex-col items-center justify-center w-full max-w-xl z-20 py-2">
               {/* Text above envelope */}
               <div ref={textRef} className="text-center mb-5 md:mb-7 space-y-1.5">
-                {/* Calligraphic Ganesha Emblem */}
+                {/* Auspicious Ganesha Emblem */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] as const }}
-                  className="flex justify-center mb-3"
+                  className="flex justify-center mb-2 filter drop-shadow-[0_4px_12px_rgba(201,154,69,0.3)]"
                 >
-                  <CalligraphyGanesha className="w-16 h-16 md:w-20 md:h-20" />
+                  <Image
+                    src="/images/ganpati.png"
+                    alt="Lord Shree Ganesha"
+                    width={90}
+                    height={110}
+                    priority
+                    className="w-16 h-auto md:w-20 select-none object-contain"
+                  />
                 </motion.div>
 
                 {/* Auspicious Blessing invocation */}
