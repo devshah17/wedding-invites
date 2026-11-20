@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useSyncExternalStore } from 'react';
 
 export interface FloatingParticlesProps {
   /** Number of floating gold particles (default: 25) */
@@ -30,67 +30,76 @@ const GOLD_SHADES = [
   '#E2CA9D', // Champagne Gold
 ];
 
+function subscribeReducedMotion(callback: () => void) {
+  const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+  query.addEventListener('change', callback);
+  return () => query.removeEventListener('change', callback);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+const emptySubscribe = () => () => {};
+
+function subscribeVisibility(callback: () => void) {
+  document.addEventListener('visibilitychange', callback);
+  return () => document.removeEventListener('visibilitychange', callback);
+}
+
+function generateParticles(count: number): ParticleConfig[] {
+  return Array.from({ length: count }, (_, i) => {
+    const seed1 = (i * 9301 + 49297) % 233280;
+    const seed2 = (i * 49297 + 9301) % 233280;
+    const seed3 = (i * 233280 + 49297) % 9301;
+    const r1 = seed1 / 233280;
+    const r2 = seed2 / 233280;
+    const r3 = seed3 / 9301;
+
+    const size = +(2 + r1 * 4).toFixed(1); // 2 - 6px
+    const duration = +(5 + r2 * 7).toFixed(1); // 5 - 12s
+    const delay = +(r3 * 6).toFixed(1); // 0 - 6s
+    const driftX = +(-20 + r1 * 40).toFixed(1); // -20 to 20px
+    const driftY = +(-40 - r2 * 50).toFixed(1); // -40 to -90px
+    const maxOpacity = +(0.2 + r3 * 0.3).toFixed(2); // 0.2 - 0.5
+    const color = GOLD_SHADES[i % GOLD_SHADES.length];
+    const left = +(r1 * 100).toFixed(1);
+    const top = +(10 + r2 * 85).toFixed(1);
+    const glow = r3 > 0.4;
+
+    return {
+      id: i,
+      left,
+      top,
+      size,
+      color,
+      duration,
+      delay,
+      driftX,
+      driftY,
+      maxOpacity,
+      glow,
+    };
+  });
+}
+
 export function FloatingParticles({
   count = 25,
   className = '',
 }: FloatingParticlesProps) {
-  const [particles, setParticles] = useState<ParticleConfig[]>([]);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const prefersReducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    () => false
+  );
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isPaused = useSyncExternalStore(
+    subscribeVisibility,
+    () => document.hidden,
+    () => false
+  );
 
-  useEffect(() => {
-    // Check prefers-reduced-motion
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(motionQuery.matches);
-
-    const handleMotionChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-    motionQuery.addEventListener('change', handleMotionChange);
-
-    // Page Visibility API to pause animations when tab is not active
-    const handleVisibilityChange = () => {
-      setIsPaused(document.hidden);
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Generate randomized particles deterministically on client mount
-    const generated: ParticleConfig[] = Array.from({ length: count }, (_, i) => {
-      const size = +(2 + Math.random() * 4).toFixed(1); // 2 - 6px
-      const duration = +(5 + Math.random() * 7).toFixed(1); // 5 - 12s
-      const delay = +(Math.random() * 6).toFixed(1); // 0 - 6s
-      const driftX = +(-20 + Math.random() * 40).toFixed(1); // -20 to 20px
-      const driftY = +(-40 - Math.random() * 50).toFixed(1); // -40 to -90px
-      const maxOpacity = +(0.2 + Math.random() * 0.3).toFixed(2); // 0.2 - 0.5
-      const color = GOLD_SHADES[i % GOLD_SHADES.length];
-      const left = +(Math.random() * 100).toFixed(1);
-      const top = +(10 + Math.random() * 85).toFixed(1);
-      const glow = Math.random() > 0.4;
-
-      return {
-        id: i,
-        left,
-        top,
-        size,
-        color,
-        duration,
-        delay,
-        driftX,
-        driftY,
-        maxOpacity,
-        glow,
-      };
-    });
-
-    setParticles(generated);
-    setMounted(true);
-
-    return () => {
-      motionQuery.removeEventListener('change', handleMotionChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [count]);
+  const particles = useMemo(() => generateParticles(count), [count]);
 
   // If reduced motion is requested or before mount, render nothing
   if (!mounted || prefersReducedMotion) {

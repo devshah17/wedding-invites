@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
@@ -274,7 +274,7 @@ export function InvitationEnvelope({
                     }
                   }}
                   aria-label="Click to open wedding invitation envelope"
-                  className="group relative w-[330px] sm:w-[410px] md:w-[460px] h-[220px] sm:h-[270px] md:h-[300px] rounded-2xl cursor-pointer transition-shadow duration-300"
+                  className="group relative w-[min(340px,88vw)] sm:w-[410px] md:w-[460px] h-[min(230px,58vw)] sm:h-[270px] md:h-[300px] rounded-2xl cursor-pointer transition-shadow duration-300"
                   style={{
                     backgroundColor: theme.colors.royalMaroon,
                     boxShadow:
@@ -314,8 +314,8 @@ export function InvitationEnvelope({
                       Together With Their Families
                     </div>
 
-                    {/* Couple Initials Preview — uses initials to fit the narrow card space */}
-                    <div className="font-script text-3xl sm:text-4xl text-royal-maroon leading-tight my-1 tracking-wide">
+                    {/* Couple Initials Preview — single line, fit nicely in card space */}
+                    <div className="font-script text-2xl sm:text-3xl md:text-4xl text-royal-maroon leading-tight my-1 tracking-wide whitespace-nowrap">
                       {weddingConfig.coupleInitials}
                     </div>
 
@@ -439,11 +439,25 @@ export function InvitationEnvelope({
                   </div>
 
                   {/* ------------------------------------------------------ */}
-                  {/* Auspicious Royal Golden Wax Seal                       */}
+                  {/* Auspicious Royal Golden Wax Seal (Interactive Button)  */}
                   {/* ------------------------------------------------------ */}
                   <div
                     ref={sealRef}
-                    className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-16 h-16 sm:w-[70px] sm:h-[70px] rounded-full transition-transform duration-300 group-hover:scale-105"
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenClick();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleOpenClick();
+                      }
+                    }}
+                    aria-label="Dev & Vishakha seal button - click to open envelope"
+                    className="absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-[72px] h-[72px] sm:w-[84px] sm:h-[84px] rounded-full transition-transform duration-300 group-hover:scale-105 active:scale-95 cursor-pointer"
                     style={{
                       zIndex: 40,
                       background:
@@ -454,11 +468,11 @@ export function InvitationEnvelope({
                     }}
                   >
                     {/* Concentric inner engraved ring */}
-                    <div className="absolute inset-1.5 rounded-full border border-antique-gold/70 border-dashed pointer-events-none" />
+                    <div className="absolute inset-1.5 sm:inset-2 rounded-full border border-antique-gold/70 border-dashed pointer-events-none" />
 
-                    {/* Seal Monogram Initials */}
+                    {/* Seal Monogram Initials — single line, perfectly centered inside ring */}
                     <span
-                      className="font-script text-2xl sm:text-[28px] font-bold tracking-tight text-deep-burgundy select-none"
+                      className="font-script text-xl sm:text-2xl font-bold tracking-normal whitespace-nowrap text-deep-burgundy select-none leading-none px-1 text-center"
                       style={{
                         textShadow: '0 1px 1px rgba(255, 255, 255, 0.6)',
                       }}
@@ -539,7 +553,7 @@ export function InvitationEnvelope({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.7, y: 20 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-6 right-6 z-50"
+            className="fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-50"
           >
             <button
               type="button"
@@ -607,54 +621,6 @@ function GoldenBell({ size = 26 }: { size?: number }) {
   );
 }
 
-/**
- * Vertical Marigold Garland (Toran) Component
- */
-function MarigoldGarland({ count = 8 }: { count?: number }) {
-  return (
-    <div className="flex flex-col items-center gap-1 py-4">
-      {/* Golden hanging thread */}
-      <div className="w-[1px] h-8 bg-antique-gold/40" />
-
-      {Array.from({ length: count }).map((_, i) => {
-        const isOrange = i % 2 === 0;
-        const color = isOrange ? '#D85A32' : '#FFB703';
-        const innerColor = isOrange ? '#FFB703' : '#FFF3DB';
-
-        return (
-          <div key={i} className="relative flex items-center justify-center my-0.5">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
-            >
-              {/* Petal cluster */}
-              {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-                <circle
-                  key={angle}
-                  cx="12"
-                  cy="12"
-                  r="5"
-                  fill={color}
-                  transform={`rotate(${angle} 12 12) translate(0 -4)`}
-                  opacity="0.9"
-                />
-              ))}
-              {/* Inner highlight */}
-              <circle cx="12" cy="12" r="4" fill={innerColor} opacity="0.8" />
-              <circle cx="12" cy="12" r="2" fill="#781F35" opacity="0.5" />
-            </svg>
-          </div>
-        );
-      })}
-
-      {/* Hanging tassel at bottom of garland */}
-      <div className="w-2 h-4 bg-gradient-to-b from-antique-gold to-vermilion rounded-b-sm shadow-xs mt-1" />
-    </div>
-  );
-}
 
 /**
  * Auspicious Lord Ganesha Emblem SVG

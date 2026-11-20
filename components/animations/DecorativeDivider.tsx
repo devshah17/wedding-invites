@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { colors, animations } from '@/config/theme';
+import { colors } from '@/config/theme';
 
 export interface DecorativeDividerProps {
   /** Optional custom CSS class */

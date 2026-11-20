@@ -222,7 +222,7 @@ export function ScratchCard() {
         <SectionReveal direction="up" delay={0.2}>
           <div
             ref={containerRef}
-            className="relative mx-auto mt-6 w-full max-w-md h-64 sm:h-72 rounded-2xl overflow-hidden shadow-2xl border-2 border-antique-gold/40 bg-gradient-to-br from-champagne/40 via-ivory to-soft-blush/30"
+            className="relative mx-auto mt-6 w-full max-w-[340px] sm:max-w-md h-60 sm:h-72 rounded-2xl overflow-hidden shadow-2xl border-2 border-antique-gold/40 bg-gradient-to-br from-champagne/40 via-ivory to-soft-blush/30"
           >
             {/* Underlying Revealed Card Content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#FFFDF9] via-[#FAF3E0] to-[#F5E6CC] text-royal-maroon select-none">

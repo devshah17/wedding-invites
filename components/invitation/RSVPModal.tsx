@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { X, CheckCircle2, Heart, Users, Phone, User, MessageSquare, Sparkles } from 'lucide-react';
 import { weddingEvents } from '@/config/events';
 import { saveRSVP, getRSVPByMobile } from '@/lib/rsvp-storage';
@@ -18,23 +18,26 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
   const [mobile, setMobile] = useState('');
   const [totalAttendees, setTotalAttendees] = useState(1);
   const [message, setMessage] = useState('');
-  const [eventAttendance, setEventAttendance] = useState<Record<string, boolean>>({});
+  const [prevEventId, setPrevEventId] = useState(defaultEventId);
+  const [eventAttendance, setEventAttendance] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    weddingEvents.forEach((ev) => {
+      initial[ev.id] = defaultEventId ? ev.id === defaultEventId : true;
+    });
+    return initial;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Initialize event attendance
-  useEffect(() => {
-    if (isOpen) {
-      const initial: Record<string, boolean> = {};
-      weddingEvents.forEach((ev) => {
-        initial[ev.id] = defaultEventId ? ev.id === defaultEventId : true;
-      });
-      setEventAttendance(initial);
-      setIsSuccess(false);
-      setErrorMessage('');
-    }
-  }, [isOpen, defaultEventId]);
+  if (defaultEventId !== prevEventId) {
+    setPrevEventId(defaultEventId);
+    const initial: Record<string, boolean> = {};
+    weddingEvents.forEach((ev) => {
+      initial[ev.id] = defaultEventId ? ev.id === defaultEventId : true;
+    });
+    setEventAttendance(initial);
+  }
 
   // When mobile changes, check if guest already submitted before
   const handleMobileBlur = () => {
@@ -100,6 +103,12 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
     }
   };
 
+  const handleClose = () => {
+    setIsSuccess(false);
+    setErrorMessage('');
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -109,7 +118,7 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={onClose}
+        onClick={handleClose}
         className="fixed inset-0 bg-deep-burgundy/70 backdrop-blur-sm"
       />
 
@@ -123,7 +132,7 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
         {/* Close Button */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-4 right-4 p-2 rounded-full bg-champagne/40 hover:bg-champagne/80 text-royal-maroon transition-colors"
           aria-label="Close RSVP form"
         >
@@ -162,7 +171,7 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-royal-maroon to-deep-burgundy text-champagne font-sans font-semibold text-xs uppercase tracking-wider shadow-md hover:opacity-95"
             >
               Done

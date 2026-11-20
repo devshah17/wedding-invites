@@ -15,7 +15,7 @@ function BananaLeafFronds({ flip = false }: { flip?: boolean }) {
       viewBox="0 0 220 260"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`w-36 sm:w-48 md:w-60 lg:w-72 h-auto filter drop-shadow-[0_4px_10px_rgba(49,87,44,0.3)] select-none pointer-events-none ${
+      className={`w-20 sm:w-36 md:w-52 lg:w-72 h-auto filter drop-shadow-[0_4px_10px_rgba(49,87,44,0.3)] select-none pointer-events-none ${
         flip ? '-scale-x-100' : ''
       }`}
     >
@@ -346,7 +346,7 @@ export function TraditionalCanopy() {
         </div>
 
         {/* Hanging Brass Samai Diya */}
-        <div className="ml-3 sm:ml-6 -mt-2">
+        <div className="ml-1 sm:ml-6 -mt-2 scale-75 sm:scale-100 origin-top">
           <HangingBrassSamai delay={0} />
         </div>
       </div>
@@ -354,7 +354,7 @@ export function TraditionalCanopy() {
       {/* ================= 3. TOP-RIGHT BANANA FRONDS & HANGING LAMPS ================= */}
       <div className="fixed top-0 right-0 z-30 pointer-events-none select-none flex items-start justify-end">
         {/* Hanging Brass Samai Diya */}
-        <div className="mr-3 sm:mr-6 -mt-2">
+        <div className="mr-1 sm:mr-6 -mt-2 scale-75 sm:scale-100 origin-top">
           <HangingBrassSamai delay={1.8} />
         </div>
 

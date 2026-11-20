@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Music } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
 
 export function MusicToggle() {
@@ -10,14 +10,9 @@ export function MusicToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Check session storage preference
-    const savedPref = sessionStorage.getItem('wedding_music_enabled');
-    if (savedPref === 'true') {
-      setIsPlaying(true);
-    }
-
     // Auto-start music on first user click anywhere if not explicitly muted
     const handleFirstInteraction = () => {
+      const savedPref = sessionStorage.getItem('wedding_music_enabled');
       if (!hasInteracted) {
         setHasInteracted(true);
         if (savedPref !== 'false' && audioRef.current) {
@@ -78,7 +73,7 @@ export function MusicToggle() {
         type="button"
         onClick={toggleMusic}
         title={isPlaying ? 'Mute background music' : 'Play traditional wedding music'}
-        className={`fixed bottom-6 left-6 z-40 flex items-center justify-center w-12 h-12 rounded-full shadow-xl transition-all duration-300 border border-antique-gold/50 backdrop-blur-md ${
+        className={`fixed bottom-4 left-3 sm:bottom-6 sm:left-6 z-40 flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-xl transition-all duration-300 border border-antique-gold/50 backdrop-blur-md ${
           isPlaying
             ? 'bg-royal-maroon text-champagne animate-pulse'
             : 'bg-ivory/90 text-royal-maroon hover:bg-ivory'

@@ -13,7 +13,7 @@ function PichwaiTreeBranch({ flip = false }: { flip?: boolean }) {
       viewBox="0 0 120 400"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`w-28 sm:w-36 md:w-44 lg:w-52 h-auto opacity-75 select-none pointer-events-none filter drop-shadow-[0_4px_8px_rgba(201,154,69,0.15)] ${
+      className={`w-14 sm:w-24 md:w-36 lg:w-52 h-auto opacity-70 select-none pointer-events-none filter drop-shadow-[0_4px_8px_rgba(201,154,69,0.15)] ${
         flip ? '-scale-x-100' : ''
       }`}
     >
@@ -196,16 +196,18 @@ export function SacredSurroundings() {
       {/* ================= LEFT BORDER SURROUNDINGS ================= */}
       <div className="fixed top-0 left-0 bottom-0 pointer-events-none z-20 flex flex-col justify-between overflow-hidden">
         {/* Top-Left Hanging Bells */}
-        <div className="flex items-start gap-4 pl-2 sm:pl-4 pt-0">
+        <div className="flex items-start gap-3 pl-1 sm:pl-4 pt-0">
           <HangingTempleBell delay={0} />
-          <HangingTempleBell delay={1.4} />
           <div className="hidden sm:block">
+            <HangingTempleBell delay={1.4} />
+          </div>
+          <div className="hidden md:block">
             <HangingTempleBell delay={0.7} />
           </div>
         </div>
 
         {/* Mid/Lower-Left Animated Pichwai Kalpavriksha Tree */}
-        <div className="animated-tree-left -ml-6 sm:-ml-2 mb-12 sm:mb-20">
+        <div className="animated-tree-left -ml-8 sm:-ml-2 mb-12 sm:mb-20">
           <PichwaiTreeBranch flip={false} />
         </div>
       </div>
@@ -213,16 +215,18 @@ export function SacredSurroundings() {
       {/* ================= RIGHT BORDER SURROUNDINGS ================= */}
       <div className="fixed top-0 right-0 bottom-0 pointer-events-none z-20 flex flex-col justify-between overflow-hidden">
         {/* Top-Right Hanging Bells */}
-        <div className="flex items-start justify-end gap-4 pr-2 sm:pr-4 pt-0">
-          <div className="hidden sm:block">
+        <div className="flex items-start justify-end gap-3 pr-1 sm:pr-4 pt-0">
+          <div className="hidden md:block">
             <HangingTempleBell delay={0.9} />
           </div>
-          <HangingTempleBell delay={2.1} />
+          <div className="hidden sm:block">
+            <HangingTempleBell delay={2.1} />
+          </div>
           <HangingTempleBell delay={0.3} />
         </div>
 
         {/* Mid/Lower-Right Animated Pichwai Kalpavriksha Tree */}
-        <div className="animated-tree-right -mr-6 sm:-mr-2 mb-12 sm:mb-20 self-end">
+        <div className="animated-tree-right -mr-8 sm:-mr-2 mb-12 sm:mb-20 self-end">
           <PichwaiTreeBranch flip={true} />
         </div>
       </div>

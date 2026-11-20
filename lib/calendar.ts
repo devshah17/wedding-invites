@@ -57,7 +57,8 @@ function formatToICSDateTime(dateStr: string, timeStr?: string, defaultHourOffse
     day = datePartMatch[3];
   }
 
-  let { hours, minutes } = parseTimeComponents(timeStr);
+  const { minutes } = parseTimeComponents(timeStr);
+  let { hours } = parseTimeComponents(timeStr);
   if (defaultHourOffset > 0) {
     hours = (hours + defaultHourOffset) % 24;
   }

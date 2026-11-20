@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { weddingConfig } from '@/config/wedding';
 import { formatWeddingDate } from '@/lib/date';
 import { DecorativeDivider } from '@/components/animations/DecorativeDivider';
-import { GanpatiArtwork, RoyalElephantArtwork } from '@/components/sacred/DeityArtworks';
+import { RoyalElephantArtwork } from '@/components/sacred/DeityArtworks';
 import { CalligraphyGanesha } from '@/components/sacred/CalligraphyGanesha';
 
 /**
@@ -404,7 +404,7 @@ export function InvitationHero() {
             }}
             className="w-full"
           >
-            <h1 className="font-script text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-royal-maroon font-normal leading-tight select-none tracking-normal drop-shadow-xs">
+            <h1 className="font-script text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-royal-maroon font-normal leading-tight select-none tracking-normal drop-shadow-xs">
               {groomName}
             </h1>
           </motion.div>
@@ -505,7 +505,7 @@ export function InvitationHero() {
             }}
             className="w-full"
           >
-            <h1 className="font-script text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-royal-maroon font-normal leading-tight select-none tracking-normal drop-shadow-xs">
+            <h1 className="font-script text-5xl sm:text-7xl md:text-8xl lg:text-9xl text-royal-maroon font-normal leading-tight select-none tracking-normal drop-shadow-xs">
               {brideName}
             </h1>
           </motion.div>
@@ -537,12 +537,12 @@ export function InvitationHero() {
           transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="mt-4 sm:mt-5 flex flex-col items-center gap-1.5"
         >
-          <div className="flex items-center gap-3">
-            <span className="w-8 sm:w-12 h-[1px] bg-gradient-to-r from-transparent to-antique-gold/70" />
-            <time className="font-serif text-lg sm:text-xl md:text-2xl text-antique-gold font-semibold tracking-wide">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="w-6 sm:w-12 h-[1px] bg-gradient-to-r from-transparent to-antique-gold/70" />
+            <time className="font-serif text-base sm:text-xl md:text-2xl text-antique-gold font-semibold tracking-wide text-center">
               {formattedWeddingDate}
             </time>
-            <span className="w-8 sm:w-12 h-[1px] bg-gradient-to-l from-transparent to-antique-gold/70" />
+            <span className="w-6 sm:w-12 h-[1px] bg-gradient-to-l from-transparent to-antique-gold/70" />
           </div>
         </motion.div>
       </div>

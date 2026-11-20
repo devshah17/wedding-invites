@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, Calendar } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { weddingEvents } from '@/config/events';
 import { EventCard } from './EventCard';
 import { SectionReveal } from '@/components/animations/SectionReveal';

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Heart, Sparkles } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
 import { SectionReveal } from '@/components/animations/SectionReveal';
@@ -19,8 +18,8 @@ export function ThankYouSection() {
         <SectionReveal direction="up">
           {/* Couple Initials Seal */}
           <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-antique-gold via-champagne to-antique-gold p-[2px] shadow-xl mb-6 mx-auto">
-            <div className="w-full h-full rounded-full bg-royal-maroon flex items-center justify-center text-champagne border border-antique-gold/40">
-              <span className="font-script text-3xl sm:text-4xl text-antique-gold">
+            <div className="w-full h-full rounded-full bg-royal-maroon flex items-center justify-center text-champagne border border-antique-gold/40 px-2">
+              <span className="font-script text-2xl sm:text-3xl md:text-4xl text-antique-gold whitespace-nowrap leading-none">
                 {weddingConfig.coupleInitials}
               </span>
             </div>

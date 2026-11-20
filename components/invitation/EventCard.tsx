@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Calendar, Sparkles, Shirt } from 'lucide-react';
+import { Clock, Calendar } from 'lucide-react';
 import type { WeddingEvent } from '@/types/event';
 import { LocationPanel } from './LocationPanel';
 import { CalendarButton } from './CalendarButton';
@@ -138,8 +138,6 @@ function ThemedEventMotif({ eventId }: { eventId: string }) {
 }
 
 export function EventCard({ event, index }: EventCardProps) {
-  const isEven = index % 2 === 0;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 35 }}
@@ -196,19 +194,8 @@ export function EventCard({ event, index }: EventCardProps) {
 
           {/* Description */}
           <p className="text-sm sm:text-base font-serif text-deep-burgundy/85 leading-relaxed italic mb-6">
-            "{event.description}"
+            &ldquo;{event.description}&rdquo;
           </p>
-
-          {/* Dress Code (if applicable) */}
-          {event.dressCode && (
-            <div className="flex items-start gap-2 mb-6 p-3 rounded-xl bg-white/50 border border-antique-gold/20">
-              <Shirt className="w-4 h-4 text-antique-gold shrink-0 mt-0.5" />
-              <div className="text-xs font-sans text-deep-burgundy/80 leading-snug">
-                <strong className="font-semibold text-royal-maroon">Attire: </strong>
-                {event.dressCode}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Bottom Section: Location Panel & Actions */}

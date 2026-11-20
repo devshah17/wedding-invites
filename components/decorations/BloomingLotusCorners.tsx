@@ -197,13 +197,13 @@ export function BloomingLotusCorners() {
       <div className="fixed bottom-0 left-0 pointer-events-none select-none z-25 flex items-end">
         <div className="lotus-corner-left relative -ml-4 sm:-ml-2 -mb-2 sm:-mb-1">
           {/* Sage Leaf Sprig Behind */}
-          <div className="absolute -top-12 left-4 sm:left-8">
+          <div className="absolute -top-12 left-4 sm:left-8 hidden sm:block">
             <SageFoliageSprig flip={false} />
           </div>
 
           <div className="flex items-end">
             {/* Primary Blooming Pink Lotus */}
-            <div className="relative z-10">
+            <div className="relative z-10 scale-[0.65] sm:scale-100 origin-bottom-left opacity-75 sm:opacity-100">
               <LotusFlower size={145} rotate={-10} />
             </div>
 
@@ -219,7 +219,7 @@ export function BloomingLotusCorners() {
       <div className="fixed bottom-0 right-0 pointer-events-none select-none z-25 flex items-end justify-end">
         <div className="lotus-corner-right relative -mr-4 sm:-mr-2 -mb-2 sm:-mb-1">
           {/* Sage Leaf Sprig Behind */}
-          <div className="absolute -top-12 right-4 sm:right-8">
+          <div className="absolute -top-12 right-4 sm:right-8 hidden sm:block">
             <SageFoliageSprig flip={true} />
           </div>
 
@@ -230,7 +230,7 @@ export function BloomingLotusCorners() {
             </div>
 
             {/* Primary Blooming Pink Lotus */}
-            <div className="relative z-10">
+            <div className="relative z-10 scale-[0.65] sm:scale-100 origin-bottom-right opacity-75 sm:opacity-100">
               <LotusFlower size={145} rotate={10} />
             </div>
           </div>

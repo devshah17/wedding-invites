@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Clock } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
@@ -17,7 +17,7 @@ function TimeBlock({ label, value }: TimeBlockProps) {
   return (
     <div className="flex flex-col items-center">
       {/* Box */}
-      <div className="relative w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-28 rounded-xl bg-gradient-to-b from-champagne/40 to-ivory border border-antique-gold/40 shadow-lg shadow-royal-maroon/5 flex items-center justify-center overflow-hidden">
+      <div className="relative w-[56px] xs:w-16 sm:w-20 md:w-24 h-18 xs:h-20 sm:h-24 md:h-28 rounded-xl bg-gradient-to-b from-champagne/40 to-ivory border border-antique-gold/40 shadow-lg shadow-royal-maroon/5 flex items-center justify-center overflow-hidden">
         {/* Subtle center groove line for flip effect look */}
         <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[1px] bg-antique-gold/20 z-10" />
 
@@ -29,7 +29,7 @@ function TimeBlock({ label, value }: TimeBlockProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 16, opacity: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-royal-maroon tracking-tight"
+            className="font-serif text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-royal-maroon tracking-tight"
           >
             {formattedValue}
           </motion.span>
@@ -43,53 +43,47 @@ function TimeBlock({ label, value }: TimeBlockProps) {
       </div>
 
       {/* Label */}
-      <span className="mt-2 text-[10px] sm:text-xs font-sans uppercase tracking-widest text-antique-gold font-semibold">
+      <span className="mt-1.5 sm:mt-2 text-[9px] xs:text-[10px] sm:text-xs font-sans uppercase tracking-widest text-antique-gold font-semibold">
         {label}
       </span>
     </div>
   );
 }
 
+const emptySubscribe = () => () => {};
+
 export function CountdownTimer() {
   const targetDate = weddingConfig.weddingDate;
   const timezone = weddingConfig.timezone;
 
-  const [mounted, setMounted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [hasPassed, setHasPassed] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
-    setMounted(true);
-    setHasPassed(isWeddingPassed(targetDate, timezone));
-    setTimeLeft(getCountdown(targetDate, timezone));
-
-    const interval = setInterval(() => {
-      if (isWeddingPassed(targetDate, timezone)) {
-        setHasPassed(true);
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      } else {
-        setTimeLeft(getCountdown(targetDate, timezone));
-      }
+    const timer = setInterval(() => {
+      setTick((t) => t + 1);
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [targetDate, timezone]);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!mounted) {
-    // Avoid hydration mismatch
+    // Avoid hydration mismatch and prerender date evaluation
     return (
-      <div className="flex justify-center items-center gap-3 sm:gap-4 md:gap-6 py-6">
+      <div className="flex justify-center items-center gap-1.5 xs:gap-2.5 sm:gap-4 md:gap-6 py-6">
         {['Days', 'Hours', 'Minutes', 'Seconds'].map((lbl) => (
           <div key={lbl} className="flex flex-col items-center">
-            <div className="w-16 h-20 sm:w-20 sm:h-24 md:w-24 md:h-28 rounded-xl bg-champagne/30 border border-antique-gold/20 flex items-center justify-center">
-              <span className="font-serif text-2xl sm:text-3xl text-royal-maroon/40">--</span>
+            <div className="w-[56px] xs:w-16 sm:w-20 md:w-24 h-18 xs:h-20 sm:h-24 md:h-28 rounded-xl bg-champagne/30 border border-antique-gold/20 flex items-center justify-center">
+              <span className="font-serif text-xl xs:text-2xl sm:text-3xl text-royal-maroon/40">--</span>
             </div>
-            <span className="mt-2 text-xs font-sans uppercase tracking-widest text-antique-gold/50">{lbl}</span>
+            <span className="mt-1.5 sm:mt-2 text-[9px] xs:text-[10px] sm:text-xs font-sans uppercase tracking-widest text-antique-gold/50">{lbl}</span>
           </div>
         ))}
       </div>
     );
   }
+
+  const hasPassed = isWeddingPassed(targetDate, timezone);
+  const timeLeft = getCountdown(targetDate, timezone);
 
   if (hasPassed) {
     return (
@@ -110,13 +104,13 @@ export function CountdownTimer() {
         <span>The Countdown to Forever</span>
       </div>
 
-      <div className="flex justify-center items-center gap-2.5 sm:gap-4 md:gap-6">
+      <div className="flex justify-center items-center gap-1.5 xs:gap-2.5 sm:gap-4 md:gap-6">
         <TimeBlock label="Days" value={timeLeft.days} />
-        <span className="text-xl sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-6">:</span>
+        <span className="text-base sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-5 sm:-mt-6">:</span>
         <TimeBlock label="Hours" value={timeLeft.hours} />
-        <span className="text-xl sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-6">:</span>
+        <span className="text-base sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-5 sm:-mt-6">:</span>
         <TimeBlock label="Minutes" value={timeLeft.minutes} />
-        <span className="text-xl sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-6">:</span>
+        <span className="text-base sm:text-2xl md:text-3xl font-serif text-antique-gold -mt-5 sm:-mt-6">:</span>
         <TimeBlock label="Seconds" value={timeLeft.seconds} />
       </div>
     </div>

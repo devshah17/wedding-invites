@@ -57,7 +57,7 @@ function BlessingCard({
 
       {/* Blessing Description */}
       <p className="mt-2 text-xs sm:text-sm font-serif italic text-deep-burgundy/80 leading-relaxed max-w-xs">
-        "{description}"
+        &ldquo;{description}&rdquo;
       </p>
 
       {/* Companion Sacred Animals (Cows / Elephants) */}
@@ -79,7 +79,7 @@ export function DivineBlessingsSection() {
           <div className="text-center mb-14">
             {/* Top Royal Elephant Emblems */}
             <div className="flex items-center justify-center gap-3 sm:gap-6 mb-3">
-              <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85" facing="right" />
+              <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85 hidden sm:block" facing="right" />
               <div className="flex flex-col items-center">
                 <div className="inline-flex items-center justify-center space-x-2 text-antique-gold mb-1">
                   <Sparkles className="w-4 h-4 text-antique-gold animate-pulse" />
@@ -92,7 +92,7 @@ export function DivineBlessingsSection() {
                   Blessed by the Divine
                 </h2>
               </div>
-              <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85" facing="left" />
+              <RoyalElephantArtwork className="w-14 h-12 sm:w-20 sm:h-16 opacity-85 hidden sm:block" facing="left" />
             </div>
 
             <p className="mt-2 text-deep-burgundy/80 font-serif italic text-base sm:text-lg max-w-2xl mx-auto">

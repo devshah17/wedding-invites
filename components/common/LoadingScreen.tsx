@@ -38,8 +38,8 @@ export function LoadingScreen({ onLoaded }: LoadingScreenProps) {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const }}
               className="w-24 h-24 rounded-full border-2 border-antique-gold/60 p-1 flex items-center justify-center shadow-2xl bg-royal-maroon/60"
             >
-              <div className="w-full h-full rounded-full border border-antique-gold/40 flex items-center justify-center">
-                <span className="font-script text-4xl text-antique-gold">
+              <div className="w-full h-full rounded-full border border-antique-gold/40 flex items-center justify-center px-2">
+                <span className="font-script text-3xl sm:text-4xl text-antique-gold whitespace-nowrap leading-none">
                   {weddingConfig.coupleInitials}
                 </span>
               </div>
