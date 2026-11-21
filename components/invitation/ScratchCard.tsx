@@ -27,9 +27,15 @@ interface BurstPetal {
   id: number;
   angle: number;
   distance: number;
+  arcHeight: number;
+  gravityFall: number;
   size: number;
   rot: number;
+  delay: number;
+  duration: number;
+  type: 'rose' | 'hibiscus' | 'marigold' | 'jasmine' | 'goldFlake' | 'hibiscusBloom';
   color: string;
+  isMobile: boolean;
 }
 
 const BURST_COLORS = ['#A6192E', '#C41E3A', '#FF2E93', '#FF69B4', '#F59E0B', '#E5C158', '#FFFDF9'];
@@ -69,22 +75,56 @@ const SHOWER_PETALS: ShowerPetal[] = (() => {
   });
 })();
 
-// Pre-computed deterministic central flower burst from card
+// Pre-computed deterministic central flower burst from card (66 flowers & petals across 3 waves)
 const BURST_PETALS: BurstPetal[] = (() => {
-  return Array.from({ length: 20 }, (_, i) => {
+  const types: ('rose' | 'hibiscus' | 'marigold' | 'jasmine' | 'goldFlake' | 'hibiscusBloom')[] = [
+    'rose',
+    'hibiscusBloom',
+    'marigold',
+    'jasmine',
+    'hibiscus',
+    'goldFlake',
+  ];
+
+  const total = 66;
+  return Array.from({ length: total }, (_, i) => {
     const seed = (i * 7919 + 104729) % 233280;
     const r1 = seed / 233280;
     const r2 = ((seed * 9301 + 49297) % 233280) / 233280;
     const r3 = ((seed * 49297 + 9301) % 233280) / 233280;
-    const angle = (i / 20) * Math.PI * 2 + (r1 - 0.5) * 0.2;
-    const distance = 90 + r2 * 110;
+    const r4 = ((seed * 12345 + 67890) % 233280) / 233280;
+    const r5 = ((seed * 34567 + 12345) % 233280) / 233280;
+
+    // 3 concentric expanding waves: 0 = core, 1 = mid plume, 2 = grand outer arc
+    const wave = i % 3;
+    const baseDist = wave === 0 ? 80 : wave === 1 ? 160 : 245;
+    const distance = baseDist + r2 * (wave === 0 ? 60 : wave === 1 ? 75 : 90);
+
+    // Full 360-degree radial spread with natural organic angular jitter
+    const angle = (i / total) * Math.PI * 2 + (r1 - 0.5) * 0.35;
+
+    // Upward fountain arc against gravity
+    const arcHeight = Math.round(45 + r3 * 65);
+    // Gentle settling gravity drop
+    const gravityFall = Math.round(25 + r4 * 55);
+
+    const duration = Number((1.5 + wave * 0.28 + r5 * 0.35).toFixed(2));
+    const delay = Number((wave * 0.07 + r1 * 0.1).toFixed(2));
+
     return {
       id: i,
       angle,
       distance,
-      size: Math.round(14 + r3 * 12),
+      arcHeight,
+      gravityFall,
+      size: Math.round(16 + r3 * 16), // 16px to 32px
       rot: Math.round(r1 * 360),
+      delay,
+      duration,
+      type: types[i % types.length],
       color: BURST_COLORS[i % BURST_COLORS.length],
+      // 44 flowers on mobile, all 66 on desktop
+      isMobile: wave !== 2,
     };
   });
 })();
@@ -331,6 +371,13 @@ export function ScratchCard() {
       return SHOWER_PETALS.filter((p) => p.isMobileOnly); // 35 elegant petals on mobile
     }
     return SHOWER_PETALS; // 70 petals on desktop
+  }, [isMobileScreen]);
+
+  const activeBurstPetals = useMemo(() => {
+    if (isMobileScreen) {
+      return BURST_PETALS.filter((p) => p.isMobile); // 44 flowers & petals on mobile
+    }
+    return BURST_PETALS; // 66 flowers & petals on desktop
   }, [isMobileScreen]);
 
   return (
@@ -652,36 +699,145 @@ export function ScratchCard() {
               </div>
             ))}
 
-            {/* 2. Center Fountain Burst from Card */}
+            {/* 2. Center Fountain Burst from Card (66 Authentic Flowers & Petals) */}
             <div
               key={`burst-${burstKey}`}
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             >
-              {BURST_PETALS.map((bp) => {
-                const distanceScale = isMobileScreen ? 0.65 : 1.0;
+              {activeBurstPetals.map((bp) => {
+                const distanceScale = isMobileScreen ? 0.62 : 1.0;
                 const targetX = Math.cos(bp.angle) * bp.distance * distanceScale;
-                const targetY = Math.sin(bp.angle) * bp.distance * distanceScale - (isMobileScreen ? 40 : 60);
-                const pSize = isMobileScreen ? bp.size * 0.75 : bp.size;
+                const targetY = Math.sin(bp.angle) * bp.distance * distanceScale;
+                const arcH = bp.arcHeight * (isMobileScreen ? 0.65 : 1.0);
+                const grav = bp.gravityFall * (isMobileScreen ? 0.65 : 1.0);
+                const pSize = isMobileScreen ? bp.size * 0.8 : bp.size;
+
                 return (
                   <motion.div
                     key={bp.id}
-                    initial={{ x: 0, y: 0, scale: 0.2, opacity: 1, rotate: 0 }}
+                    initial={{ x: 0, y: 0, scale: 0.1, opacity: 0, rotate: 0 }}
                     animate={{
-                      x: targetX,
-                      y: targetY,
-                      scale: [0.2, 1.15, 0.85],
-                      opacity: [1, 0.95, 0],
-                      rotate: bp.rot + 360,
+                      x: [0, targetX * 0.65, targetX],
+                      y: [0, targetY - arcH, targetY + grav],
+                      scale: [0.1, 1.3, 0.95, 0],
+                      opacity: [0, 1, 0.95, 0],
+                      rotate: [0, bp.rot * 0.5, bp.rot + 540],
                     }}
-                    transition={{ duration: 1.6, ease: 'easeOut' }}
-                    className="absolute rounded-full filter drop-shadow-xs"
-                    style={{
-                      width: `${pSize}px`,
-                      height: `${pSize * 1.3}px`,
-                      background: `radial-gradient(ellipse at 40% 30%, #FFFFFF 0%, ${bp.color} 70%, #541426 100%)`,
-                      borderRadius: '50% 50% 50% 0',
+                    transition={{
+                      duration: bp.duration,
+                      delay: bp.delay,
+                      times: [0, 0.42, 0.85, 1],
+                      ease: 'easeOut',
                     }}
-                  />
+                    className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                  >
+                    {/* Full Hibiscus Blossom with Stamen Column */}
+                    {bp.type === 'hibiscusBloom' && (
+                      <svg
+                        width={pSize * 1.25}
+                        height={pSize * 1.25}
+                        viewBox="0 0 40 40"
+                        className="filter drop-shadow-[0_2px_6px_rgba(194,24,91,0.35)]"
+                      >
+                        <g transform="translate(20, 20)">
+                          {[0, 72, 144, 216, 288].map((angle, idx) => (
+                            <path
+                              key={idx}
+                              d="M0 0 C-6 -8, -10 -16, 0 -18 C10 -16, 6 -8, 0 0 Z"
+                              fill="url(#hibiscusShowerGrad)"
+                              transform={`rotate(${angle})`}
+                            />
+                          ))}
+                          <line x1="0" y1="0" x2="3" y2="-7" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" />
+                          <circle cx="3" cy="-7" r="1.5" fill="#FDE047" />
+                          <circle cx="0" cy="0" r="2.5" fill="#880E4F" />
+                        </g>
+                      </svg>
+                    )}
+
+                    {/* Fragrant White Jasmine (Mogra) Blossom */}
+                    {bp.type === 'jasmine' && (
+                      <svg
+                        width={pSize * 1.05}
+                        height={pSize * 1.05}
+                        viewBox="0 0 32 32"
+                        className="filter drop-shadow-[0_2px_5px_rgba(0,0,0,0.18)]"
+                      >
+                        <g transform="translate(16, 16)">
+                          {[0, 72, 144, 216, 288].map((angle, idx) => (
+                            <path
+                              key={idx}
+                              d="M0 0 C-3 -6, -4 -12, 0 -14 C4 -12, 3 -6, 0 0 Z"
+                              fill="#FFFDF7"
+                              stroke="#E8E2D5"
+                              strokeWidth="0.5"
+                              transform={`rotate(${angle})`}
+                            />
+                          ))}
+                          <circle r="2.4" fill="#FDE047" />
+                        </g>
+                      </svg>
+                    )}
+
+                    {/* Velvet Red Rose Petal */}
+                    {bp.type === 'rose' && (
+                      <svg
+                        width={pSize}
+                        height={pSize * 1.25}
+                        viewBox="0 0 32 40"
+                        className="filter drop-shadow-[0_2px_6px_rgba(166,25,46,0.4)]"
+                      >
+                        <path
+                          d="M16 2 C8 2 2 12 2 24 C2 33 9 38 16 38 C23 38 30 33 30 24 C30 12 24 2 16 2 Z"
+                          fill="url(#roseShowerGrad)"
+                        />
+                      </svg>
+                    )}
+
+                    {/* Pink Hibiscus / Lotus Petal */}
+                    {bp.type === 'hibiscus' && (
+                      <svg
+                        width={pSize}
+                        height={pSize * 1.2}
+                        viewBox="0 0 32 38"
+                        className="filter drop-shadow-[0_2px_6px_rgba(255,46,147,0.4)]"
+                      >
+                        <path
+                          d="M16 2 C6 6 2 16 4 28 C6 35 12 37 16 37 C20 37 26 35 28 28 C30 16 26 6 16 2 Z"
+                          fill="url(#hibiscusShowerGrad)"
+                        />
+                      </svg>
+                    )}
+
+                    {/* Golden Saffron Marigold Petal */}
+                    {bp.type === 'marigold' && (
+                      <svg
+                        width={pSize * 0.75}
+                        height={pSize * 1.3}
+                        viewBox="0 0 24 40"
+                        className="filter drop-shadow-[0_2px_5px_rgba(245,158,11,0.4)]"
+                      >
+                        <path
+                          d="M12 2 C7 8 4 18 6 30 C8 38 11 39 12 39 C13 39 16 38 18 30 C20 18 17 8 12 2 Z"
+                          fill="url(#marigoldShowerGrad)"
+                        />
+                      </svg>
+                    )}
+
+                    {/* Shimmering Gold Leaf Foil Flake */}
+                    {bp.type === 'goldFlake' && (
+                      <div
+                        style={{
+                          width: `${pSize * 0.65}px`,
+                          height: `${pSize * 0.65}px`,
+                          background: 'linear-gradient(135deg, #FAF0D7 0%, #D4AF37 50%, #9E782F 100%)',
+                          boxShadow: '0 2px 7px rgba(212,175,55,0.5)',
+                          transform: 'rotate(45deg)',
+                          borderRadius: '2px',
+                        }}
+                      />
+                    )}
+                  </motion.div>
                 );
               })}
             </div>
