@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
 import { formatWeddingDate } from '@/lib/date';
 import { DecorativeDivider } from '@/components/animations/DecorativeDivider';
 import Image from 'next/image';
 import { RoyalElephantArtwork } from '@/components/sacred/DeityArtworks';
+import { usePersonalizedInvitation } from '@/context/InvitationContext';
 
 /**
  * Traditional Indian Toran (hanging arch) SVG Border
@@ -332,6 +334,7 @@ function MandalaWatermark() {
  * Appears after the royal wedding envelope opens.
  */
 export function InvitationHero() {
+  const { invitation } = usePersonalizedInvitation();
   const groomName = weddingConfig.groom.firstName || 'Dev';
   const brideName = weddingConfig.bride.firstName || 'Vishakha';
 
@@ -531,16 +534,43 @@ export function InvitationHero() {
           className="my-3 sm:my-4 max-w-xs"
         />
 
-        {/* 7. Invitation Text: "Are delighted to invite you to celebrate their wedding" */}
-        <motion.p
+        {/* 7. Invitation Text: Personalized or Generic */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="font-serif text-base sm:text-lg md:text-xl text-deep-burgundy/85 tracking-wide max-w-md mx-auto text-center font-normal leading-relaxed mt-1"
+          className="max-w-xl mx-auto text-center mt-2 px-2"
         >
-          Are delighted to invite you to celebrate their wedding
-        </motion.p>
+          {invitation ? (
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-antique-gold/20 via-champagne/40 to-antique-gold/20 border border-antique-gold/50 shadow-xs">
+                <Sparkles className="w-4 h-4 text-antique-gold" />
+                <span className="font-serif text-sm sm:text-base font-bold text-royal-maroon tracking-wide">
+                  Cordially Inviting {invitation.guestName}
+                </span>
+                <Sparkles className="w-4 h-4 text-antique-gold" />
+              </div>
+
+              <p className="font-serif text-sm sm:text-base text-deep-burgundy/85 tracking-wide font-normal leading-relaxed">
+                To celebrate their joyous wedding ceremonies
+              </p>
+
+              {invitation.note && (
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-white/90 border border-antique-gold/40 shadow-md text-xs sm:text-sm font-serif italic text-deep-burgundy max-w-md mx-auto">
+                  <div className="text-[10px] font-sans font-bold uppercase tracking-wider text-antique-gold mb-1 not-italic">
+                    💌 A Special Note For You
+                  </div>
+                  &ldquo;{invitation.note}&rdquo;
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="font-serif text-base sm:text-lg md:text-xl text-deep-burgundy/85 tracking-wide max-w-md mx-auto font-normal leading-relaxed">
+              Are delighted to invite you to celebrate their wedding
+            </p>
+          )}
+        </motion.div>
 
         {/* 8. Wedding Date: Formatted wedding date */}
         <motion.div

@@ -6,6 +6,7 @@ import { X, CheckCircle2, Heart, Users, Phone, User, Sparkles } from 'lucide-rea
 import { weddingEvents } from '@/config/events';
 import { saveRSVP, getRSVPByMobile } from '@/lib/rsvp-storage';
 import type { RSVPFormData } from '@/types/rsvp';
+import { usePersonalizedInvitation } from '@/context/InvitationContext';
 
 interface RSVPModalProps {
   isOpen: boolean;
@@ -14,14 +15,24 @@ interface RSVPModalProps {
 }
 
 export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
-  const [guestName, setGuestName] = useState('');
+  const { invitation } = usePersonalizedInvitation();
+  const [guestName, setGuestName] = useState(() => invitation?.guestName || '');
   const [mobile, setMobile] = useState('');
   const [totalAttendees, setTotalAttendees] = useState(1);
   const [prevEventId, setPrevEventId] = useState(defaultEventId);
+  const availableEvents = React.useMemo(() => {
+    if (!invitation?.events || invitation.events.length === 0) {
+      return weddingEvents;
+    }
+    const filtered = weddingEvents.filter((ev) => invitation.events.includes(ev.id));
+    return filtered.length > 0 ? filtered : weddingEvents;
+  }, [invitation]);
+
   const [eventAttendance, setEventAttendance] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     weddingEvents.forEach((ev) => {
-      initial[ev.id] = defaultEventId ? ev.id === defaultEventId : true;
+      const isInvited = !invitation?.events || invitation.events.includes(ev.id);
+      initial[ev.id] = isInvited ? (defaultEventId ? ev.id === defaultEventId : true) : false;
     });
     return initial;
   });
@@ -33,7 +44,8 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
     setPrevEventId(defaultEventId);
     const initial: Record<string, boolean> = {};
     weddingEvents.forEach((ev) => {
-      initial[ev.id] = defaultEventId ? ev.id === defaultEventId : true;
+      const isInvited = !invitation?.events || invitation.events.includes(ev.id);
+      initial[ev.id] = isInvited ? (defaultEventId ? ev.id === defaultEventId : true) : false;
     });
     setEventAttendance(initial);
   }
@@ -200,10 +212,12 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
                 Wedding Celebration
               </span>
               <h3 className="text-2xl sm:text-3xl font-serif font-bold text-royal-maroon mt-1">
-                RSVP for Celebrations
+                {invitation ? `RSVP for ${invitation.guestName}` : 'RSVP for Celebrations'}
               </h3>
               <p className="text-xs text-deep-burgundy/70 font-serif italic mt-1">
-                Kindly let us know which auspicious ceremonies you will grace with your presence.
+                {invitation
+                  ? `Please confirm your presence for your ${availableEvents.length} invited celebrations.`
+                  : 'Kindly let us know which auspicious ceremonies you will grace with your presence.'}
               </p>
             </div>
 
@@ -274,7 +288,7 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
                   <span>Select Ceremonies Attending</span>
                 </label>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {weddingEvents.map((ev) => (
+                  {availableEvents.map((ev) => (
                     <div
                       key={ev.id}
                       onClick={() => toggleEvent(ev.id)}
