@@ -4,15 +4,17 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 /**
- * Botanical 3D Floral Hibiscus Frame Borders (SacredSurroundings)
+ * Natural Botanical 3D Floral Hibiscus Frame Borders (SacredSurroundings)
  * - Reference: 'Floral Hibiscus Frame Borders.png'
- * - Dense, rounded topiary bush mounds with layered 3D foliage and glossy obovate leaves.
- * - Mobile-safe: Tightly bounded along outer borders (width ~38-44px on mobile) with ZERO content overlap.
- * - Hibiscus Flower Orientation: Faces directly OUT OF THE SCREEN towards the user (+Z axis),
- *   proudly displaying the wide-open 5 ruffled petals, glowing star throat, and golden stamen column.
- * - Real-Time Botanical Wind: Individual leaves flex and twist on their stem pivots in the breeze.
- * - Edge-Flush Guarantee: Rooted mathematically at x = -width/2 and x = width/2 with 0px gap.
- * - 100% Non-Blocking: Canvas has pointer-events: none, preserving complete click-through for all UI.
+ * - Natural Bush Alignment: Continuous organic S-curve silhouette with cohesive topiary cloud mounds,
+ *   subtle connecting twigs, and natural leaf density transitions.
+ * - Natural Flower Alignment: Hibiscus flowers arranged in organic botanical pairings
+ *   (Primary Bloom + Companion Semi-Open Blossom + Bud Twig Sprays) nestled into the foliage crooks.
+ * - Flower Orientation: Faces directly OUT OF THE SCREEN towards the user (+Z axis),
+ *   showcasing the full circle of ruffled pink petals, glowing star throat, and golden stamen column.
+ * - Mobile Safe: Strictly bounded along the outer screen border (38-42px on mobile) with 0px content overlap.
+ * - Real-Time Wind Physics: Individual leaves, petals, and stamens gently flex and flutter on their stem pivots.
+ * - Edge-Flush Guarantee: Rooted at x = -width/2 and x = width/2 with 0px gap on mobile and PC.
  */
 
 interface DynamicLeaf {
@@ -40,6 +42,14 @@ interface DynamicFlower {
   swayPhase: number;
 }
 
+interface DynamicBud {
+  group: THREE.Group;
+  baseX: number;
+  baseY: number;
+  baseRotZ: number;
+  phaseSeed: number;
+}
+
 interface FallingPetal3D {
   mesh: THREE.Mesh;
   vx: number;
@@ -52,14 +62,14 @@ interface FallingPetal3D {
   maxLife: number;
 }
 
-/* 1. Procedural Texture for Glossy Botanical Leaves */
+/* 1. Procedural High-Resolution Texture for Glossy Botanical Leaves */
 function createGlossyLeafTexture(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  // Smooth vertical botanical gradient: dark emerald base -> rich foliage green -> bright sunlit apex
+  // Smooth botanical gradient: dark emerald base -> rich foliage green -> bright sunlit apex
   const grad = ctx.createLinearGradient(0, 512, 0, 0);
   grad.addColorStop(0.0, '#153A10'); // deep shadow petiole
   grad.addColorStop(0.28, '#265C1C'); // base foliage
@@ -116,7 +126,7 @@ function createHibiscusPetalTexture(): THREE.CanvasTexture {
   ctx.fillStyle = '#FF2E93';
   ctx.fillRect(0, 0, 256, 256);
 
-  // Radial gradient: luminous pale center around throat -> deep crimson -> radiant fuchsia -> blush edge
+  // Radial gradient: luminous pale center -> deep crimson -> radiant fuchsia -> blush edge
   const grad = ctx.createRadialGradient(128, 240, 6, 128, 120, 195);
   grad.addColorStop(0.0, '#FFE8F0'); // pale luminous throat center
   grad.addColorStop(0.12, '#8A0030'); // deep crimson ring
@@ -171,9 +181,7 @@ function createCurvedLeafGeometry(w = 24, l = 46): THREE.BufferGeometry {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const normY = y / l;
-    // Central V-crease along midrib so specular light splits realistically
     const crease = -Math.abs(x) * 0.26;
-    // Longitudinal arching curve along the blade
     const arch = Math.sin(normY * Math.PI) * 3.2;
     pos.setZ(i, crease + arch);
   }
@@ -196,7 +204,6 @@ function createCurvedPetalGeometry(w = 36, l = 54): THREE.BufferGeometry {
     const x = pos.getX(i);
     const y = pos.getY(i);
     const normY = Math.min(1, Math.max(0, y / l));
-    // Shallow saucer cupping
     const cup = -Math.sin(normY * Math.PI * 0.8) * 5.0;
     const ripple = Math.sin((x / w) * Math.PI * 3.0) * 1.4 * normY;
     pos.setZ(i, cup + ripple);
@@ -237,16 +244,14 @@ export function SacredSurroundings() {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 3. Dynamic Lighting Setup for Glossy Botanical Leaves
+    // 3. Dynamic Lighting Setup
     const ambientLight = new THREE.AmbientLight(0xfff6ea, 1.45);
     scene.add(ambientLight);
 
-    // Warm sun directional light creating glossy specular highlights on curved leaf ridges
     const sunLight = new THREE.DirectionalLight(0xfffaec, 2.2);
     sunLight.position.set(150, 400, 550);
     scene.add(sunLight);
 
-    // Soft fill rim light
     const rimLight = new THREE.DirectionalLight(0xffd580, 0.85);
     rimLight.position.set(-200, -200, 300);
     scene.add(rimLight);
@@ -276,11 +281,23 @@ export function SacredSurroundings() {
       side: THREE.DoubleSide,
     });
 
+    const twigMaterial = new THREE.MeshStandardMaterial({
+      color: 0x3d2b1f, // warm woody twig
+      roughness: 0.5,
+      metalness: 0.05,
+    });
+
     const petalMaterial = new THREE.MeshStandardMaterial({
       map: petalTexture,
       roughness: 0.38,
       metalness: 0.02,
       side: THREE.DoubleSide,
+    });
+
+    const budMaterial = new THREE.MeshStandardMaterial({
+      color: 0xff3b94,
+      roughness: 0.3,
+      metalness: 0.05,
     });
 
     const stamenStemMat = new THREE.MeshStandardMaterial({
@@ -304,7 +321,6 @@ export function SacredSurroundings() {
     const leafGeomSmall = createCurvedLeafGeometry(14, 26);
     const petalGeom = createCurvedPetalGeometry(36, 54);
 
-    // Stamen cylinder rotated to point forward along +Z towards viewer!
     const stamenStemGeom = new THREE.CylinderGeometry(1.1, 0.7, 34, 8);
     stamenStemGeom.rotateX(Math.PI / 2);
     stamenStemGeom.translate(0, 0, 17);
@@ -312,12 +328,20 @@ export function SacredSurroundings() {
     const antherGeom = new THREE.SphereGeometry(1.1, 6, 6);
     const stigmaGeom = new THREE.SphereGeometry(1.4, 6, 6);
 
+    const twigGeom = new THREE.CylinderGeometry(1.0, 0.7, 40, 6);
+    twigGeom.translate(0, 20, 0);
+
+    const budTipGeom = new THREE.ConeGeometry(3.0, 8, 8);
+    budTipGeom.translate(0, 4, 0);
+
     // 6. Containers
     const leaves: DynamicLeaf[] = [];
     const flowers: DynamicFlower[] = [];
+    const buds: DynamicBud[] = [];
     const fallingPetals: FallingPetal3D[] = [];
+    const twigs: THREE.Mesh[] = [];
 
-    // Helper: Build a 3D Hibiscus Flower FACING FORWARD TOWARDS THE VIEWER (+Z axis)
+    // Helper: Build a 3D Hibiscus Flower FACING OUT OF THE SCREEN towards the user (+Z axis)
     function buildHibiscusFlower(scale = 1.0, flip = false): {
       group: THREE.Group;
       petals: THREE.Mesh[];
@@ -333,8 +357,7 @@ export function SacredSurroundings() {
       for (let i = 0; i < petalCount; i++) {
         const petal = new THREE.Mesh(petalGeom, petalMaterial);
         const angle = i * ((Math.PI * 2) / petalCount);
-        // Shallow flare outward of ~16 degrees so petals form a wide saucer bloom facing camera
-        const flareX = 0.28;
+        const flareX = 0.26;
         basePetalRotX.push(flareX);
 
         petal.rotation.z = angle;
@@ -367,57 +390,93 @@ export function SacredSurroundings() {
         stamenGroup.add(stigma);
       }
 
-      // Subtle outward upward curvature of the stamen
-      stamenGroup.rotation.x = -0.08;
-      stamenGroup.rotation.y = flip ? -0.06 : 0.06;
+      stamenGroup.rotation.x = -0.06;
+      stamenGroup.rotation.y = flip ? -0.05 : 0.05;
       flowerGroup.add(stamenGroup);
 
       flowerGroup.scale.set(scale, scale, scale);
       return { group: flowerGroup, petals, basePetalRotX, stamen: stamenGroup };
     }
 
-    // 7. Generate Full Top-to-Bottom Shrub Hedges Organized as Bush Mounds
+    // Helper: Build a delicate slender bud twig with teardrop pink tip
+    function buildBudTwig(scale = 1.0): THREE.Group {
+      const budGroup = new THREE.Group();
+      const stem = new THREE.Mesh(twigGeom, twigMaterial);
+      stem.scale.set(0.6, 0.7, 0.6);
+      budGroup.add(stem);
+
+      const tip = new THREE.Mesh(budTipGeom, budMaterial);
+      tip.position.y = 26;
+      budGroup.add(tip);
+
+      const sepal = new THREE.Mesh(leafGeomSmall, leafSproutMaterial);
+      sepal.scale.set(0.35, 0.35, 0.35);
+      sepal.position.set(0, 22, 1);
+      budGroup.add(sepal);
+
+      budGroup.scale.set(scale, scale, scale);
+      return budGroup;
+    }
+
+    // 7. Generate Full Top-to-Bottom Shrub Hedges with Natural Bush Alignment & Flower Pairing
     function populateHedges() {
       leaves.forEach((l) => scene.remove(l.mesh));
       flowers.forEach((f) => scene.remove(f.group));
+      buds.forEach((b) => scene.remove(b.group));
+      twigs.forEach((t) => scene.remove(t));
       leaves.length = 0;
       flowers.length = 0;
+      buds.length = 0;
+      twigs.length = 0;
 
       const isMobile = width < 640;
       const isTablet = width >= 640 && width < 1024;
 
       // STRICT BORDER BOUNDS: Keep hedge tightly bounded on screen edges
-      // On mobile: reach is strictly 38-44px max, leaving >300px clear for card content!
-      // On PC: reach is 135-155px, framing the desktop canvas.
-      const hedgeReach = isMobile ? Math.min(42, width * 0.11) : isTablet ? 85 : 145;
-      const flowerScale = isMobile ? 0.5 : isTablet ? 0.75 : 1.05;
-      const leafScale = isMobile ? 0.58 : isTablet ? 0.78 : 1.0;
+      // On mobile: reach is strictly 38-42px max, leaving >300px clear for card content!
+      // On PC: reach is 135-150px, gracefully framing the desktop canvas.
+      const hedgeReach = isMobile ? Math.min(40, width * 0.105) : isTablet ? 85 : 145;
+      const flowerScale = isMobile ? 0.48 : isTablet ? 0.72 : 1.02;
+      const leafScale = isMobile ? 0.55 : isTablet ? 0.76 : 1.0;
 
-      const yStart = height / 2 + 25;
-      const yEnd = -height / 2 - 25;
+      const yStart = height / 2 + 30;
+      const yEnd = -height / 2 - 30;
       // Step between bush cloud mounds
-      const moundStep = isMobile ? 42 : 52;
+      const moundStep = isMobile ? 40 : 50;
 
-      // ================= LEFT BORDER: TOPIARY BUSH MOUNDS =================
+      // ================= LEFT BORDER: NATURAL BOTANICAL BUSH =================
       const leftRootX = -width / 2; // EXACT SCREEN LEFT BORDER TOUCH!
 
       for (let y = yStart; y >= yEnd; y -= moundStep) {
-        const moundCenterX = leftRootX + hedgeReach * 0.45;
-        const moundCenterY = y + Math.sin(y * 0.04) * (hedgeReach * 0.12);
+        // Natural undulating S-curve silhouette rhythm
+        const waveOffset = Math.sin(y * 0.012) * (hedgeReach * 0.15) + Math.cos(y * 0.025) * (hedgeReach * 0.08);
+        const currentMoundReach = hedgeReach + waveOffset;
+        const moundCenterX = leftRootX + currentMoundReach * 0.48;
+        const moundCenterY = y;
 
-        // 1. Solid Wall Backing Leaves (pinned tightly to left screen border with 0 gap)
+        // 1. Connecting woody twig branch inside the mound
+        if (!isMobile || y % 80 < 40) {
+          const twig = new THREE.Mesh(twigGeom, twigMaterial);
+          twig.scale.set(leafScale * 0.8, leafScale * 0.9, leafScale * 0.8);
+          twig.position.set(moundCenterX - currentMoundReach * 0.2, moundCenterY - 10, -12);
+          twig.rotation.z = Math.PI * 0.45 + Math.sin(y * 0.05) * 0.25;
+          scene.add(twig);
+          twigs.push(twig);
+        }
+
+        // 2. Solid Wall Backing Leaves (pinned tightly to left screen border with 0 gap)
         const wallLeafCount = isMobile ? 2 : 3;
         for (let w = 0; w < wallLeafCount; w++) {
           const leaf = new THREE.Mesh(leafGeomMid, leafShadowMaterial);
           leaf.scale.set(leafScale, leafScale, leafScale);
-          const lx = leftRootX + w * (hedgeReach * 0.2) - 1;
-          const ly = y + (w - 1) * 12;
+          const lx = leftRootX + w * (currentMoundReach * 0.2) - 1;
+          const ly = y + (w - 1) * 10;
           const lz = -18 - w * 3;
           leaf.position.set(lx, ly, lz);
 
-          const rotZ = Math.PI * 0.48 + (Math.random() - 0.5) * 0.2;
-          const rotX = 0.1;
-          const rotY = 0.15;
+          const rotZ = Math.PI * 0.48 + (Math.random() - 0.5) * 0.15;
+          const rotX = 0.08;
+          const rotY = 0.12;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -430,23 +489,23 @@ export function SacredSurroundings() {
             baseRotY: rotY,
             baseRotZ: rotZ,
             phaseSeed: y * 0.02 + w,
-            flex: 0.3,
+            flex: 0.28,
           });
         }
 
-        // 2. Bush Mound Core (Dense dark foliage forming the interior of the bush)
+        // 3. Dense Shrub Core (volumetric leaf cluster forming the center of the mound)
         const coreCount = isMobile ? 2 : 4;
         for (let c = 0; c < coreCount; c++) {
           const leaf = new THREE.Mesh(leafGeomLarge, leafMaterial);
           leaf.scale.set(leafScale * 0.95, leafScale * 0.95, leafScale * 0.95);
-          const cx = moundCenterX + (Math.random() - 0.5) * (hedgeReach * 0.3);
-          const cy = moundCenterY + (Math.random() - 0.5) * 16;
+          const cx = moundCenterX + (Math.random() - 0.5) * (currentMoundReach * 0.25);
+          const cy = moundCenterY + (Math.random() - 0.5) * 14;
           const cz = -10 + c * 3;
           leaf.position.set(cx, cy, cz);
 
-          const rotZ = Math.PI * 0.35 + (c * 0.35);
-          const rotX = 0.2;
-          const rotY = 0.2;
+          const rotZ = Math.PI * 0.35 + (c * 0.32);
+          const rotX = 0.18;
+          const rotY = 0.15;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -459,11 +518,11 @@ export function SacredSurroundings() {
             baseRotY: rotY,
             baseRotZ: rotZ,
             phaseSeed: y * 0.015 + c * 2,
-            flex: 0.5,
+            flex: 0.48,
           });
         }
 
-        // 3. Bush Mound Dome (Leaves radiating outward forming the rounded cloud shape)
+        // 4. Bush Mound Dome (Leaves radiating outward forming the rounded cloud shape)
         const domeCount = isMobile ? 4 : 7;
         for (let d = 0; d < domeCount; d++) {
           const isOuterEdge = d >= domeCount - 2;
@@ -472,20 +531,19 @@ export function SacredSurroundings() {
           const leaf = new THREE.Mesh(geom, mat);
           leaf.scale.set(leafScale, leafScale, leafScale);
 
-          // Fan outward from mound center in an arc into the screen
-          const arcAngle = (d / (domeCount - 1)) * Math.PI * 0.9 - Math.PI * 0.45;
-          const radiusX = hedgeReach * 0.48;
-          const radiusY = (moundStep * 0.42);
+          // Fan outward in a smooth rounded arc into the screen
+          const arcAngle = (d / (domeCount - 1)) * Math.PI * 0.85 - Math.PI * 0.42;
+          const radiusX = currentMoundReach * 0.46;
+          const radiusY = moundStep * 0.44;
 
           const lx = moundCenterX + Math.cos(arcAngle) * radiusX;
           const ly = moundCenterY + Math.sin(arcAngle) * radiusY;
-          const lz = 2 + Math.sin(arcAngle * 2) * 8;
+          const lz = 2 + Math.sin(arcAngle * 2) * 7;
           leaf.position.set(lx, ly, lz);
 
-          // Leaf points outward from mound center
           const rotZ = arcAngle + Math.PI * 0.5;
-          const rotX = 0.25;
-          const rotY = 0.15;
+          const rotX = 0.22;
+          const rotY = 0.12;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -498,68 +556,126 @@ export function SacredSurroundings() {
             baseRotY: rotY,
             baseRotZ: rotZ,
             phaseSeed: y * 0.018 + d * 2,
-            flex: 0.8 + (d / domeCount) * 0.4,
+            flex: 0.75 + (d / domeCount) * 0.35,
           });
         }
       }
 
-      // Left Hibiscus Flowers: Facing FORWARD towards the viewer (+Z)
-      const leftFlowerHeights = [
-        height * 0.34,
-        height * 0.12,
-        -height * 0.1,
-        -height * 0.32,
-      ];
-      leftFlowerHeights.forEach((fy, idx) => {
-        const s = flowerScale * (idx % 2 === 0 ? 1.05 : 0.88);
-        const { group, petals, basePetalRotX, stamen } = buildHibiscusFlower(s, false);
-        // Position nestled right at the bush perimeter
-        const fx = leftRootX + hedgeReach * 0.72;
-        const fz = 24;
-        group.position.set(fx, fy, fz);
+      // ================= LEFT HIBISCUS FLOWERS: NATURAL PAIRINGS & ALIGNMENT =================
+      // Cluster 1: Upper Left (Primary Bloom + Companion Semi-Open Blossom + Bud Sprays)
+      const leftCluster1Y = height * 0.26;
+      const leftC1Reach = hedgeReach * 0.75;
 
-        // FACING FORWARD TOWARDS USER (+Z axis):
-        // rotX ≈ 0.04, rotY ≈ 0.06 (subtle natural angle, but facing directly at viewer)
-        const baseRotZ = Math.PI * 0.15 * (idx % 2 === 0 ? 1 : -1);
-        const baseRotX = 0.04;
-        const baseRotY = 0.06;
-        group.rotation.set(baseRotX, baseRotY, baseRotZ);
-        scene.add(group);
-
-        flowers.push({
-          group,
-          baseX: fx,
-          baseY: fy,
-          baseRotX,
-          baseRotY,
-          baseRotZ,
-          petals,
-          basePetalRotX,
-          stamen,
-          swayPhase: idx * 1.8,
-        });
+      // 1. Main Large Blossom (scale 1.05) - facing out of screen towards user
+      const f1 = buildHibiscusFlower(flowerScale * 1.05, false);
+      const f1X = leftRootX + leftC1Reach;
+      f1.group.position.set(f1X, leftCluster1Y, 26);
+      f1.group.rotation.set(0.04, 0.05, Math.PI * 0.08); // facing forward towards viewer
+      scene.add(f1.group);
+      flowers.push({
+        group: f1.group,
+        baseX: f1X,
+        baseY: leftCluster1Y,
+        baseRotX: 0.04,
+        baseRotY: 0.05,
+        baseRotZ: Math.PI * 0.08,
+        petals: f1.petals,
+        basePetalRotX: f1.basePetalRotX,
+        stamen: f1.stamen,
+        swayPhase: 0,
       });
 
-      // ================= RIGHT BORDER: TOPIARY BUSH MOUNDS =================
+      // 2. Companion Semi-Open Blossom (scale 0.65) nestled just above-right of main flower
+      const f1Comp = buildHibiscusFlower(flowerScale * 0.65, false);
+      const f1CompX = f1X + (isMobile ? 12 : 28);
+      const f1CompY = leftCluster1Y + (isMobile ? 18 : 36);
+      f1Comp.group.position.set(f1CompX, f1CompY, 20);
+      f1Comp.group.rotation.set(0.06, 0.08, -Math.PI * 0.12);
+      scene.add(f1Comp.group);
+      flowers.push({
+        group: f1Comp.group,
+        baseX: f1CompX,
+        baseY: f1CompY,
+        baseRotX: 0.06,
+        baseRotY: 0.08,
+        baseRotZ: -Math.PI * 0.12,
+        petals: f1Comp.petals,
+        basePetalRotX: f1Comp.basePetalRotX,
+        stamen: f1Comp.stamen,
+        swayPhase: 0.8,
+      });
+
+      // 3. Bud Twig Sprays extending naturally from cluster
+      const bud1 = buildBudTwig(leafScale * 0.8);
+      const b1X = f1CompX + (isMobile ? 8 : 16);
+      const b1Y = f1CompY + (isMobile ? 14 : 26);
+      bud1.position.set(b1X, b1Y, 18);
+      bud1.rotation.z = Math.PI * 0.35;
+      scene.add(bud1);
+      buds.push({ group: bud1, baseX: b1X, baseY: b1Y, baseRotZ: Math.PI * 0.35, phaseSeed: 1.2 });
+
+      // Cluster 2: Mid-Lower Left (Medium Bloom + Baby Bud)
+      const leftCluster2Y = -height * 0.15;
+      const f2 = buildHibiscusFlower(flowerScale * 0.92, false);
+      const f2X = leftRootX + leftC1Reach * 0.95;
+      f2.group.position.set(f2X, leftCluster2Y, 24);
+      f2.group.rotation.set(0.03, 0.05, -Math.PI * 0.06);
+      scene.add(f2.group);
+      flowers.push({
+        group: f2.group,
+        baseX: f2X,
+        baseY: leftCluster2Y,
+        baseRotX: 0.03,
+        baseRotY: 0.05,
+        baseRotZ: -Math.PI * 0.06,
+        petals: f2.petals,
+        basePetalRotX: f2.basePetalRotX,
+        stamen: f2.stamen,
+        swayPhase: 2.4,
+      });
+
+      const bud2 = buildBudTwig(leafScale * 0.75);
+      const b2X = f2X + (isMobile ? 10 : 20);
+      const b2Y = leftCluster2Y - (isMobile ? 14 : 24);
+      bud2.position.set(b2X, b2Y, 18);
+      bud2.rotation.z = Math.PI * 0.65;
+      scene.add(bud2);
+      buds.push({ group: bud2, baseX: b2X, baseY: b2Y, baseRotZ: Math.PI * 0.65, phaseSeed: 3.1 });
+
+
+      // ================= RIGHT BORDER: NATURAL BOTANICAL BUSH =================
       const rightRootX = width / 2; // EXACT SCREEN RIGHT BORDER TOUCH!
 
       for (let y = yStart; y >= yEnd; y -= moundStep) {
-        const moundCenterX = rightRootX - hedgeReach * 0.45;
-        const moundCenterY = y + Math.cos(y * 0.04) * (hedgeReach * 0.12);
+        // Natural undulating S-curve silhouette rhythm (asymmetric to left side)
+        const waveOffset = Math.cos(y * 0.012 + 1) * (hedgeReach * 0.15) + Math.sin(y * 0.025) * (hedgeReach * 0.08);
+        const currentMoundReach = hedgeReach + waveOffset;
+        const moundCenterX = rightRootX - currentMoundReach * 0.48;
+        const moundCenterY = y;
 
-        // 1. Solid Wall Backing Leaves (pinned tightly to right screen border with 0 gap)
+        // 1. Connecting woody twig branch
+        if (!isMobile || y % 80 < 40) {
+          const twig = new THREE.Mesh(twigGeom, twigMaterial);
+          twig.scale.set(leafScale * 0.8, leafScale * 0.9, leafScale * 0.8);
+          twig.position.set(moundCenterX + currentMoundReach * 0.2, moundCenterY - 10, -12);
+          twig.rotation.z = -Math.PI * 0.45 - Math.cos(y * 0.05) * 0.25;
+          scene.add(twig);
+          twigs.push(twig);
+        }
+
+        // 2. Solid Wall Backing Leaves (pinned tightly to right screen border with 0 gap)
         const wallLeafCount = isMobile ? 2 : 3;
         for (let w = 0; w < wallLeafCount; w++) {
           const leaf = new THREE.Mesh(leafGeomMid, leafShadowMaterial);
           leaf.scale.set(leafScale, leafScale, leafScale);
-          const lx = rightRootX - w * (hedgeReach * 0.2) + 1;
-          const ly = y + (w - 1) * 12;
+          const lx = rightRootX - w * (currentMoundReach * 0.2) + 1;
+          const ly = y + (w - 1) * 10;
           const lz = -18 - w * 3;
           leaf.position.set(lx, ly, lz);
 
-          const rotZ = -Math.PI * 0.48 + (Math.random() - 0.5) * 0.2;
-          const rotX = 0.1;
-          const rotY = -0.15;
+          const rotZ = -Math.PI * 0.48 + (Math.random() - 0.5) * 0.15;
+          const rotX = 0.08;
+          const rotY = -0.12;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -571,24 +687,24 @@ export function SacredSurroundings() {
             baseRotX: rotX,
             baseRotY: rotY,
             baseRotZ: rotZ,
-            phaseSeed: y * 0.02 + w + 14,
-            flex: 0.3,
+            phaseSeed: y * 0.02 + w + 16,
+            flex: 0.28,
           });
         }
 
-        // 2. Bush Mound Core
+        // 3. Dense Shrub Core
         const coreCount = isMobile ? 2 : 4;
         for (let c = 0; c < coreCount; c++) {
           const leaf = new THREE.Mesh(leafGeomLarge, leafMaterial);
           leaf.scale.set(leafScale * 0.95, leafScale * 0.95, leafScale * 0.95);
-          const cx = moundCenterX + (Math.random() - 0.5) * (hedgeReach * 0.3);
-          const cy = moundCenterY + (Math.random() - 0.5) * 16;
+          const cx = moundCenterX + (Math.random() - 0.5) * (currentMoundReach * 0.25);
+          const cy = moundCenterY + (Math.random() - 0.5) * 14;
           const cz = -10 + c * 3;
           leaf.position.set(cx, cy, cz);
 
-          const rotZ = -Math.PI * 0.35 - (c * 0.35);
-          const rotX = 0.2;
-          const rotY = -0.2;
+          const rotZ = -Math.PI * 0.35 - (c * 0.32);
+          const rotX = 0.18;
+          const rotY = -0.15;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -600,12 +716,12 @@ export function SacredSurroundings() {
             baseRotX: rotX,
             baseRotY: rotY,
             baseRotZ: rotZ,
-            phaseSeed: y * 0.015 + c * 2 + 14,
-            flex: 0.5,
+            phaseSeed: y * 0.015 + c * 2 + 16,
+            flex: 0.48,
           });
         }
 
-        // 3. Bush Mound Dome
+        // 4. Bush Mound Dome
         const domeCount = isMobile ? 4 : 7;
         for (let d = 0; d < domeCount; d++) {
           const isOuterEdge = d >= domeCount - 2;
@@ -614,18 +730,18 @@ export function SacredSurroundings() {
           const leaf = new THREE.Mesh(geom, mat);
           leaf.scale.set(leafScale, leafScale, leafScale);
 
-          const arcAngle = Math.PI - ((d / (domeCount - 1)) * Math.PI * 0.9 - Math.PI * 0.45);
-          const radiusX = hedgeReach * 0.48;
-          const radiusY = (moundStep * 0.42);
+          const arcAngle = Math.PI - ((d / (domeCount - 1)) * Math.PI * 0.85 - Math.PI * 0.42);
+          const radiusX = currentMoundReach * 0.46;
+          const radiusY = moundStep * 0.44;
 
           const lx = moundCenterX - Math.cos(arcAngle) * radiusX;
           const ly = moundCenterY + Math.sin(arcAngle) * radiusY;
-          const lz = 2 + Math.sin(arcAngle * 2) * 8;
+          const lz = 2 + Math.sin(arcAngle * 2) * 7;
           leaf.position.set(lx, ly, lz);
 
           const rotZ = -arcAngle - Math.PI * 0.5;
-          const rotX = 0.25;
-          const rotY = -0.15;
+          const rotX = 0.22;
+          const rotY = -0.12;
           leaf.rotation.set(rotX, rotY, rotZ);
           scene.add(leaf);
 
@@ -637,47 +753,82 @@ export function SacredSurroundings() {
             baseRotX: rotX,
             baseRotY: rotY,
             baseRotZ: rotZ,
-            phaseSeed: y * 0.018 + d * 2 + 20,
-            flex: 0.8 + (d / domeCount) * 0.4,
+            phaseSeed: y * 0.018 + d * 2 + 22,
+            flex: 0.75 + (d / domeCount) * 0.35,
           });
         }
       }
 
-      // Right Hibiscus Flowers: Facing FORWARD towards the viewer (+Z)
-      const rightFlowerHeights = [
-        height * 0.4,
-        height * 0.18,
-        -height * 0.04,
-        -height * 0.24,
-        -height * 0.44,
-      ];
-      rightFlowerHeights.forEach((fy, idx) => {
-        const s = flowerScale * (idx % 2 === 0 ? 1.02 : 0.86);
-        const { group, petals, basePetalRotX, stamen } = buildHibiscusFlower(s, true);
-        const fx = rightRootX - hedgeReach * 0.72;
-        const fz = 24;
-        group.position.set(fx, fy, fz);
-
-        // FACING FORWARD TOWARDS USER (+Z axis):
-        const baseRotZ = -Math.PI * 0.15 * (idx % 2 === 0 ? 1 : -1);
-        const baseRotX = 0.04;
-        const baseRotY = -0.06;
-        group.rotation.set(baseRotX, baseRotY, baseRotZ);
-        scene.add(group);
-
-        flowers.push({
-          group,
-          baseX: fx,
-          baseY: fy,
-          baseRotX,
-          baseRotY,
-          baseRotZ,
-          petals,
-          basePetalRotX,
-          stamen,
-          swayPhase: idx * 1.8 + 2.4,
-        });
+      // ================= RIGHT HIBISCUS FLOWERS: NATURAL PAIRINGS & ALIGNMENT =================
+      // Cluster 1: Upper Right (Medium Bloom nestled in upper slope)
+      const rightCluster1Y = height * 0.35;
+      const rightC1Reach = hedgeReach * 0.75;
+      const rf1 = buildHibiscusFlower(flowerScale * 0.92, true);
+      const rf1X = rightRootX - rightC1Reach * 0.95;
+      rf1.group.position.set(rf1X, rightCluster1Y, 24);
+      rf1.group.rotation.set(0.04, -0.05, -Math.PI * 0.08); // facing forward towards viewer
+      scene.add(rf1.group);
+      flowers.push({
+        group: rf1.group,
+        baseX: rf1X,
+        baseY: rightCluster1Y,
+        baseRotX: 0.04,
+        baseRotY: -0.05,
+        baseRotZ: -Math.PI * 0.08,
+        petals: rf1.petals,
+        basePetalRotX: rf1.basePetalRotX,
+        stamen: rf1.stamen,
+        swayPhase: 1.5,
       });
+
+      // Cluster 2: Mid-Lower Right (Large Main Bloom + Companion Semi-Open Blossom + Bud Sprays)
+      const rightCluster2Y = -height * 0.05;
+      const rf2 = buildHibiscusFlower(flowerScale * 1.05, true);
+      const rf2X = rightRootX - rightC1Reach;
+      rf2.group.position.set(rf2X, rightCluster2Y, 26);
+      rf2.group.rotation.set(0.04, -0.05, -Math.PI * 0.05); // facing forward towards viewer
+      scene.add(rf2.group);
+      flowers.push({
+        group: rf2.group,
+        baseX: rf2X,
+        baseY: rightCluster2Y,
+        baseRotX: 0.04,
+        baseRotY: -0.05,
+        baseRotZ: -Math.PI * 0.05,
+        petals: rf2.petals,
+        basePetalRotX: rf2.basePetalRotX,
+        stamen: rf2.stamen,
+        swayPhase: 2.8,
+      });
+
+      // Companion Blossom nestled beside main flower
+      const rf2Comp = buildHibiscusFlower(flowerScale * 0.65, true);
+      const rf2CompX = rf2X - (isMobile ? 12 : 28);
+      const rf2CompY = rightCluster2Y + (isMobile ? 18 : 36);
+      rf2Comp.group.position.set(rf2CompX, rf2CompY, 20);
+      rf2Comp.group.rotation.set(0.06, -0.08, Math.PI * 0.12);
+      scene.add(rf2Comp.group);
+      flowers.push({
+        group: rf2Comp.group,
+        baseX: rf2CompX,
+        baseY: rf2CompY,
+        baseRotX: 0.06,
+        baseRotY: -0.08,
+        baseRotZ: Math.PI * 0.12,
+        petals: rf2Comp.petals,
+        basePetalRotX: rf2Comp.basePetalRotX,
+        stamen: rf2Comp.stamen,
+        swayPhase: 3.6,
+      });
+
+      // Bud spray reaching outward
+      const rBud = buildBudTwig(leafScale * 0.8);
+      const rbX = rf2CompX - (isMobile ? 8 : 16);
+      const rbY = rf2CompY + (isMobile ? 14 : 26);
+      rBud.position.set(rbX, rbY, 18);
+      rBud.rotation.z = -Math.PI * 0.35;
+      scene.add(rBud);
+      buds.push({ group: rBud, baseX: rbX, baseY: rbY, baseRotZ: -Math.PI * 0.35, phaseSeed: 4.2 });
     }
 
     populateHedges();
@@ -712,7 +863,7 @@ export function SacredSurroundings() {
     // Tap / Click Petal Burst on borders
     const handlePointerDown = (e: PointerEvent) => {
       const clickX = e.clientX;
-      const triggerThreshold = width < 640 ? 75 : 170;
+      const triggerThreshold = width < 640 ? 70 : 165;
 
       if (clickX < triggerThreshold || clickX > width - triggerThreshold) {
         const worldX = e.clientX - width / 2;
@@ -721,7 +872,7 @@ export function SacredSurroundings() {
 
         for (let p = 0; p < 7; p++) {
           const petalMesh = new THREE.Mesh(petalGeom, petalMaterial);
-          const pScale = width < 640 ? 0.36 : 0.52;
+          const pScale = width < 640 ? 0.35 : 0.5;
           petalMesh.scale.set(pScale, pScale, pScale);
           petalMesh.position.set(
             worldX + (Math.random() - 0.5) * 20,
@@ -793,7 +944,6 @@ export function SacredSurroundings() {
         let pushX = 0;
         let pushY = 0;
         if (distSq < 25600) {
-          // within 160px
           const dist = Math.sqrt(distSq);
           const force = (1 - dist / 160) * 12.0;
           pushX = (dx / dist) * force;
@@ -819,7 +969,7 @@ export function SacredSurroundings() {
         const fl = flowers[i];
         const wave = Math.sin(time * 1.6 + fl.baseY * 0.006 + fl.swayPhase);
 
-        // Flower body gently bobs without turning away from user
+        // Flower body gently sways without turning away from user
         fl.group.rotation.z = fl.baseRotZ + wave * 0.065 * windForce + scrollTilt * 0.4;
         fl.group.rotation.x = fl.baseRotX + Math.cos(time * 1.3 + fl.swayPhase) * 0.04 * windForce;
         fl.group.position.x = fl.baseX + wave * 3.0 * windForce;
@@ -836,6 +986,13 @@ export function SacredSurroundings() {
           Math.sin(time * 5.4 + fl.swayPhase) * 0.14 + Math.cos(time * 7.8) * 0.04;
         fl.stamen.rotation.z = stamenJitter * windForce;
         fl.stamen.rotation.x = Math.sin(time * 3.8) * 0.06 * windForce;
+      }
+
+      // Update Bud Twigs
+      for (let b = 0; b < buds.length; b++) {
+        const bud = buds[b];
+        const wave = Math.sin(time * 2.6 + bud.phaseSeed);
+        bud.group.rotation.z = bud.baseRotZ + wave * 0.12 * windForce;
       }
 
       // Update Falling 3D Petals
@@ -855,7 +1012,7 @@ export function SacredSurroundings() {
 
         if (p.life > p.maxLife - 30) {
           const fade = (p.maxLife - p.life) / 30;
-          const currentScale = width < 640 ? 0.36 : 0.52;
+          const currentScale = width < 640 ? 0.35 : 0.5;
           p.mesh.scale.set(currentScale * fade, currentScale * fade, currentScale * fade);
         }
 
@@ -886,13 +1043,17 @@ export function SacredSurroundings() {
       stamenStemGeom.dispose();
       antherGeom.dispose();
       stigmaGeom.dispose();
+      twigGeom.dispose();
+      budTipGeom.dispose();
 
       leafTexture.dispose();
       petalTexture.dispose();
       leafMaterial.dispose();
       leafShadowMaterial.dispose();
       leafSproutMaterial.dispose();
+      twigMaterial.dispose();
       petalMaterial.dispose();
+      budMaterial.dispose();
       stamenStemMat.dispose();
       antherMat.dispose();
       stigmaMat.dispose();
