@@ -8,6 +8,7 @@ import { DivineBlessingsSection } from '@/components/invitation/DivineBlessingsS
 import { FamilySection } from '@/components/invitation/FamilySection';
 import { ScratchCard } from '@/components/invitation/ScratchCard';
 import { EventsSection } from '@/components/invitation/EventsSection';
+import { GreetingsSection } from '@/components/invitation/GreetingsSection';
 import { ThankYouSection } from '@/components/invitation/ThankYouSection';
 import { FlowerPetals } from '@/components/animations/FlowerPetals';
 import { TraditionalCanopy } from '@/components/decorations/TraditionalCanopy';
@@ -55,6 +56,9 @@ export default function Home() {
 
         {/* Section 5 & 6: Ceremonies Schedule & Location QR Codes */}
         <EventsSection />
+
+        {/* Section 7: Warm Wishes, Advice & Greetings Directly on Page */}
+        <GreetingsSection />
 
         {/* Section 10: Closing Blessings & Thank You */}
         <ThankYouSection />

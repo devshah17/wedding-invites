@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Heart, Sparkles } from 'lucide-react';
+import { Heart, Sparkles, MessageSquare } from 'lucide-react';
 import { weddingConfig } from '@/config/wedding';
 import { SectionReveal } from '@/components/animations/SectionReveal';
 import { DecorativeDivider } from '@/components/animations/DecorativeDivider';
@@ -55,9 +55,16 @@ export function ThankYouSection() {
             </div>
           </div>
 
-          {/* Final RSVP Trigger */}
-          <div className="mt-8">
-            <RSVPButton variant="primary" className="px-6 py-3 text-sm shadow-lg" />
+          {/* Actions: RSVP & Wishes */}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <RSVPButton variant="primary" className="px-6 py-3 text-sm shadow-lg w-full sm:w-auto" />
+            <a
+              href="#wishes"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-antique-gold/50 bg-white/80 hover:bg-antique-gold/15 text-royal-maroon font-sans font-semibold text-sm shadow-md transition-all cursor-pointer"
+            >
+              <MessageSquare className="w-4 h-4 text-antique-gold" />
+              <span>Send Blessings &amp; Wishes</span>
+            </a>
           </div>
 
           <div className="mt-16 pt-8 border-t border-antique-gold/20 flex flex-col items-center justify-center gap-2">

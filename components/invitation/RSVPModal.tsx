@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, CheckCircle2, Heart, Users, Phone, User, MessageSquare, Sparkles } from 'lucide-react';
+import { X, CheckCircle2, Heart, Users, Phone, User, Sparkles } from 'lucide-react';
 import { weddingEvents } from '@/config/events';
 import { saveRSVP, getRSVPByMobile } from '@/lib/rsvp-storage';
 import type { RSVPFormData } from '@/types/rsvp';
@@ -17,7 +17,6 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
   const [guestName, setGuestName] = useState('');
   const [mobile, setMobile] = useState('');
   const [totalAttendees, setTotalAttendees] = useState(1);
-  const [message, setMessage] = useState('');
   const [prevEventId, setPrevEventId] = useState(defaultEventId);
   const [eventAttendance, setEventAttendance] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -47,7 +46,6 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
       if (existing) {
         setGuestName(existing.guestName);
         setTotalAttendees(existing.totalAttendees || 1);
-        if (existing.message) setMessage(existing.message);
         if (existing.eventAttendance) {
           setEventAttendance(existing.eventAttendance);
         }
@@ -62,7 +60,7 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -91,10 +89,27 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
         mobile: cleanMobile,
         totalAttendees: Number(totalAttendees) || 1,
         eventAttendance,
-        message: message.trim(),
+        message: '',
       };
 
+      // Save locally first for instant offline fallback
       saveRSVP(formData);
+
+      // Persist to MongoDB
+      try {
+        const res = await fetch('/api/rsvp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        if (!res.ok) {
+          const resData = await res.json().catch(() => null);
+          console.warn('MongoDB RSVP sync warning:', resData?.error);
+        }
+      } catch (networkErr) {
+        console.warn('Network RSVP sync error, saved locally:', networkErr);
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
     } catch {
@@ -287,21 +302,6 @@ export function RSVPModal({ isOpen, onClose, defaultEventId }: RSVPModalProps) {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Message to Couple */}
-              <div>
-                <label className="block text-xs font-sans font-semibold uppercase tracking-wider text-royal-maroon mb-1.5 flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-antique-gold" />
-                  <span>Personal Message or Blessings (Optional)</span>
-                </label>
-                <textarea
-                  rows={2}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Share your warm blessings with Dev & Vishakha..."
-                  className="w-full px-4 py-2 rounded-xl border border-antique-gold/40 bg-white/90 text-deep-burgundy text-sm focus:outline-none focus:border-royal-maroon focus:ring-1 focus:ring-royal-maroon resize-none"
-                />
               </div>
 
               {/* Submit Button */}

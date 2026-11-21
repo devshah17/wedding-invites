@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, Home, Users, Calendar, Sparkles } from 'lucide-react';
+import { Heart, Home, Users, Calendar, Sparkles, MessageSquare } from 'lucide-react';
 import { RSVPModal } from '@/components/invitation/RSVPModal';
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { id: 'families', label: 'Families', icon: Users },
   { id: 'date', label: 'Save Date', icon: Calendar },
   { id: 'events', label: 'Ceremonies', icon: Sparkles },
+  { id: 'wishes', label: 'Wishes', icon: MessageSquare },
 ];
 
 interface FloatingNavigationProps {

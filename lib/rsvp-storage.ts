@@ -163,3 +163,19 @@ export function exportRSVPsToCSV(): string {
 
   return [headers.join(','), ...rows].join('\r\n');
 }
+
+/**
+ * Removes an RSVP record from localStorage by mobile number or ID.
+ */
+export function deleteRSVPFromStorage(identifier: string): void {
+  if (typeof window === 'undefined' || !identifier) return;
+  try {
+    const list = getRSVPs();
+    const filtered = list.filter(
+      (item) => item.id !== identifier && item.mobile.trim() !== identifier.trim()
+    );
+    window.localStorage.setItem(RSVP_STORAGE_KEY, JSON.stringify(filtered));
+  } catch (error) {
+    console.error('Failed to remove RSVP from localStorage:', error);
+  }
+}

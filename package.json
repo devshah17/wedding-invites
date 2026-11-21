@@ -15,6 +15,7 @@
     "framer-motion": "^14.14.0",
     "gsap": "^3.15.1",
     "lucide-react": "^1.76.0",
+    "mongoose": "^9.12.3",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
